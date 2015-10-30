@@ -8,7 +8,7 @@
 
 #import "ALVRecentSearchCell.h"
 
-const CGFloat kRecentSearchCellDefaultHeight = 32;
+const CGFloat kRecentSearchCellDefaultHeight = 30;
 
 static const CGFloat kLabelLeftInset = 15;
 static const CGFloat kSearchIconInset = 15;

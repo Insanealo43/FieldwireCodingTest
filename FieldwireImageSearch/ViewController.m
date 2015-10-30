@@ -29,7 +29,7 @@ static const CGFloat kPagingLoadHeight = 40;
 static const CGFloat kContentHeightMultiplier = 1.75;
 
 static const NSUInteger kMaxNumberSavedPreviousSearches = 10;
-static const CGFloat kRecentSearchLabelHeight = 52;
+static const CGFloat kRecentSearchLabelHeight = 48;
 
 @interface ViewController () <ALVSearchBarDelegate, IMGSessionDelegate, UICollectionViewDelegate, UICollectionViewDataSource, MWPhotoBrowserDelegate>
 
