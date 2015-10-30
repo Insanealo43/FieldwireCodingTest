@@ -84,7 +84,7 @@ static const CGFloat kRecentSearchLabelHeight = 64;
         
         UICollectionView *collectionView = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:flowLayout];
         [collectionView setBackgroundColor:[UIColor whiteColor]];
-        [collectionView setAlwaysBounceVertical:YES];
+        [collectionView setAlwaysBounceVertical:NO];
         [collectionView setContentInset:UIEdgeInsetsMake(0, kCellSpacing, kCellSpacing, kCellSpacing)];
         [collectionView setDataSource:self];
         [collectionView setDelegate:self];
@@ -204,21 +204,22 @@ static const CGFloat kRecentSearchLabelHeight = 64;
 
 #pragma mark - ALVSearchBarDelegate Methods
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
+    // Clear previous dataset states
+    self.imgurImages = nil;
+    self.browserPhotos = nil;
+    self.pageNum = nil;
+    self.isFetchingPage = NO;
+    
+    // Update collections' states
+    BOOL textExists = [searchText length] > 0;
+    [self.searchesCollection setHidden:textExists];
+    [self.imageCollection setHidden:!textExists];
+    
     dispatch_async(dispatch_get_main_queue(), ^{
-        // Clear previous dataset states
-        self.imgurImages = nil;
-        self.browserPhotos = nil;
-        self.pageNum = nil;
-        self.isFetchingPage = NO;
         
         // Remove all cells
         [self.imageCollection reloadData];
-        //[self.searchesCollection reloadData];
-        
-        BOOL textExists = [searchText length] > 0;
-        [self.searchesCollection setHidden:textExists];
-        [self.imageCollection setHidden:!textExists];
-        
+
         // Start loading animation
         if ([searchText length] > 0) {
             [self.imageCollection animateSpinner:YES];
@@ -244,7 +245,7 @@ static const CGFloat kRecentSearchLabelHeight = 64;
         }
         
         // Reload recent searches
-        [self.imageCollection reloadData];
+        [self.searchesCollection reloadData];
     }
     
     // Start Infinite Loading of search results
@@ -402,7 +403,8 @@ static const CGFloat kRecentSearchLabelHeight = 64;
         ALVRecentSearchCell *recentSearchCell = [collectionView dequeueReusableCellWithReuseIdentifier:[ALVRecentSearchCell className] forIndexPath:indexPath];
         
         // Set search term text on label here
-        [recentSearchCell.contentView setBackgroundColor:(indexPath.row % 2 == 0 ? [UIColor blueColor] : [UIColor redColor])];
+        [recentSearchCell.recentSearchLabel setText:[self.recentSearches objectAtIndex:indexPath.row]];
+        //[recentSearchCell.contentView setBackgroundColor:(indexPath.row % 2 == 0 ? [UIColor blueColor] : [UIColor redColor])];
         
         cell = recentSearchCell;
         
@@ -471,6 +473,15 @@ static const CGFloat kRecentSearchLabelHeight = 64;
             
             [self.navigationController pushViewController:browser animated:YES];
         }
+        
+    } else if ([collectionView isEqual:self.searchesCollection]) {
+        NSString *text = [self.recentSearches objectAtIndex:indexPath.row];
+        
+        [self.customSearchBar resignFirstResponder];
+        [self.customSearchBar setText:text];
+        
+        [self searchBar:self.customSearchBar textDidChange:text];
+        [self searchBar:self.customSearchBar timedTriggeredTextChange:text];
     }
 }
 

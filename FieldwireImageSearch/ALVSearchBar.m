@@ -125,15 +125,17 @@ static NSString *const kSearchTextKey = @"search_text_key";
 }
 
 #pragma mark - Setter Methods
-/*- (void)setText:(NSString *)text {
+- (void)setText:(NSString *)text {
     _text = text;
     
     UITextField *textField = [self textField];
-    NSMutableAttributedString *textAttr = [NSMutableAttributedString string:text font:textField.font color:textField.textColor textAlignment:textField.textAlignment];
-    [textField setAttributedText:textAttr];
+    [textField setText:text];
+    
+    /*NSMutableAttributedString *textAttr = [NSMutableAttributedString string:text font:textField.font color:textField.textColor textAlignment:textField.textAlignment];
+    [textField setAttributedText:textAttr];*/
 }
 
-- (void)setPlaceholder:(NSString *)placeholder {
+/*- (void)setPlaceholder:(NSString *)placeholder {
     _placeholder = placeholder;
     
     UITextField *textField = [self textField];
