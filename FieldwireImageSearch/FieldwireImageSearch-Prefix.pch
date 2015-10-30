@@ -1,0 +1,15 @@
+//
+//  FieldwireImageSearch-Prefix.pch
+//  FieldwireImageSearch
+//
+//  Created by Andrew Lopez-Vass on 10/29/15.
+//  Copyright © 2015 Andrew Lopez-Vass. All rights reserved.
+//
+
+#ifndef FieldwireImageSearch_Prefix_pch
+#define FieldwireImageSearch_Prefix_pch
+
+// Include any system framework and library headers here that should be included in all compilation units.
+// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+
+#endif /* FieldwireImageSearch_Prefix_pch */

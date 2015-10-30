@@ -1,0 +1,123 @@
+//
+//  HODelegateInterceptor.m
+//  hopOn
+//
+//  Created by Andrew Lopez-Vass on 1/26/15.
+//  Copyright (c) 2015 hopOn, Inc. All rights reserved.
+//
+
+#import "ALVDelegateInterceptor.h"
+#import  <objc/runtime.h>
+
+static inline BOOL selector_belongsToProtocol(SEL selector, Protocol *protocol);
+
+@implementation ALVDelegateInterceptor
+@synthesize interceptor;
+@synthesize originalTarget;
+
+- (void)dealloc {
+    _interceptedProtocols = nil;
+    self.originalTarget = nil;
+    self.interceptor = nil;
+}
+
+- (instancetype)initWithInterceptedProtocol:(Protocol *)interceptedProtocol {
+    self = [super init];
+    if (self) {
+        _interceptedProtocols = @[interceptedProtocol];
+    }
+    return self;
+}
+
+- (instancetype)initWithArrayOfInterceptedProtocols:(NSArray *)arrayOfInterceptedProtocols {
+    self = [super init];
+    if (self) {
+        _interceptedProtocols = [arrayOfInterceptedProtocols copy];
+    }
+    return self;
+}
+
+- (instancetype)initWithInterceptedProtocols:(Protocol *)firstInterceptedProtocol, ...; {
+    self = [super init];
+    if (self) {
+        NSMutableArray * mutableProtocols = [NSMutableArray array];
+        Protocol * eachInterceptedProtocol;
+        va_list argumentList;
+        if (firstInterceptedProtocol)
+        {
+            [mutableProtocols addObject:firstInterceptedProtocol];
+            va_start(argumentList, firstInterceptedProtocol);
+            while ((eachInterceptedProtocol = va_arg(argumentList, id))) {
+                [mutableProtocols addObject:eachInterceptedProtocol];
+            }
+            va_end(argumentList);
+        }
+        _interceptedProtocols = [mutableProtocols copy];
+    }
+    return self;
+}
+
+#pragma mark - Overriden Methods
+- (NSString *)description {
+    NSString *inteceptorMessage = [NSString stringWithFormat:@"\nInterceptor - %@", self.interceptor];
+    NSString *originalTargetMessage = [NSString stringWithFormat:@"\nOriginal Target - %@\n", self.originalTarget];
+    NSString *superDescription = [super description];
+    
+    NSString *newDescription = inteceptorMessage;
+    if (originalTargetMessage) {
+        newDescription = [newDescription stringByAppendingString:originalTargetMessage];
+    }
+    if (superDescription) {
+        newDescription = [newDescription stringByAppendingString:superDescription];
+    }
+    
+    return inteceptorMessage;
+}
+
+- (id)forwardingTargetForSelector:(SEL)aSelector {
+    if ([self.interceptor respondsToSelector:aSelector] &&
+        [self isSelectorContainedInInterceptedProtocols:aSelector])
+        return self.interceptor;
+    
+    if ([self.originalTarget respondsToSelector:aSelector])
+        return self.originalTarget;
+    
+    return [super forwardingTargetForSelector:aSelector];
+}
+
+- (BOOL)respondsToSelector:(SEL)aSelector {
+    if ([self.interceptor respondsToSelector:aSelector] &&
+        [self isSelectorContainedInInterceptedProtocols:aSelector])
+        return YES;
+    
+    if ([self.originalTarget respondsToSelector:aSelector])
+        return YES;
+    
+    return [super respondsToSelector:aSelector];
+}
+
+- (BOOL)isSelectorContainedInInterceptedProtocols:(SEL)aSelector {
+    __block BOOL isSelectorContainedInInterceptedProtocols = NO;
+    [self.interceptedProtocols enumerateObjectsUsingBlock:^(Protocol* protocol, NSUInteger idx, BOOL *stop) {
+        isSelectorContainedInInterceptedProtocols = selector_belongsToProtocol(aSelector, protocol);
+        * stop = isSelectorContainedInInterceptedProtocols;
+    }];
+    return isSelectorContainedInInterceptedProtocols;
+}
+
+@end
+
+BOOL selector_belongsToProtocol(SEL selector, Protocol * protocol) {
+    // Reference: https://gist.github.com/numist/3838169
+    for (int optionbits = 0; optionbits < (1 << 2); optionbits++) {
+        BOOL required = optionbits & 1;
+        BOOL instance = !(optionbits & (1 << 1));
+        
+        struct objc_method_description hasMethod = protocol_getMethodDescription(protocol, selector, required, instance);
+        if (hasMethod.name || hasMethod.types) {
+            return YES;
+        }
+    }
+    
+    return NO;
+}
