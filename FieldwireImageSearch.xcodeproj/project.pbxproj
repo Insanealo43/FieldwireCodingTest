@@ -21,6 +21,7 @@
 		A39C281C1BE2F62600770010 /* ALVImgurImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = A39C281B1BE2F62600770010 /* ALVImgurImageCell.m */; settings = {ASSET_TAGS = (); }; };
 		A39C281F1BE34DA400770010 /* MWPhotoBrowser+ALVAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = A39C281E1BE34DA400770010 /* MWPhotoBrowser+ALVAdditions.m */; settings = {ASSET_TAGS = (); }; };
 		A39C28221BE360C200770010 /* fieldwireLogo.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A39C28211BE360C200770010 /* fieldwireLogo.jpg */; settings = {ASSET_TAGS = (); }; };
+		A39C28251BE36DC700770010 /* ALVRecentSearchCell.m in Sources */ = {isa = PBXBuildFile; fileRef = A39C28241BE36DC700770010 /* ALVRecentSearchCell.m */; settings = {ASSET_TAGS = (); }; };
 		A3A78B441BE2C6F300306D97 /* Environments.plist in Resources */ = {isa = PBXBuildFile; fileRef = A3A78B431BE2C6F300306D97 /* Environments.plist */; settings = {ASSET_TAGS = (); }; };
 		A3A78B471BE2C77400306D97 /* ALVNetworkInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = A3A78B461BE2C77400306D97 /* ALVNetworkInterface.m */; settings = {ASSET_TAGS = (); }; };
 		A3B808191BE2B4B70071A0BA /* ALVView.m in Sources */ = {isa = PBXBuildFile; fileRef = A3B808181BE2B4B70071A0BA /* ALVView.m */; settings = {ASSET_TAGS = (); }; };
@@ -58,6 +59,8 @@
 		A39C281D1BE34DA400770010 /* MWPhotoBrowser+ALVAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MWPhotoBrowser+ALVAdditions.h"; sourceTree = "<group>"; };
 		A39C281E1BE34DA400770010 /* MWPhotoBrowser+ALVAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MWPhotoBrowser+ALVAdditions.m"; sourceTree = "<group>"; };
 		A39C28211BE360C200770010 /* fieldwireLogo.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = fieldwireLogo.jpg; sourceTree = "<group>"; };
+		A39C28231BE36DC700770010 /* ALVRecentSearchCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ALVRecentSearchCell.h; sourceTree = "<group>"; };
+		A39C28241BE36DC700770010 /* ALVRecentSearchCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ALVRecentSearchCell.m; sourceTree = "<group>"; };
 		A3A78B431BE2C6F300306D97 /* Environments.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Environments.plist; sourceTree = "<group>"; };
 		A3A78B451BE2C77400306D97 /* ALVNetworkInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ALVNetworkInterface.h; sourceTree = "<group>"; };
 		A3A78B461BE2C77400306D97 /* ALVNetworkInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ALVNetworkInterface.m; sourceTree = "<group>"; };
@@ -183,12 +186,14 @@
 			children = (
 				A3B808171BE2B4B70071A0BA /* ALVView.h */,
 				A3B808181BE2B4B70071A0BA /* ALVView.m */,
+				A39C28171BE2E97700770010 /* ALVSearchBar.h */,
+				A39C28181BE2E97700770010 /* ALVSearchBar.m */,
 				A3B808201BE2B5630071A0BA /* ALVCollectionView.h */,
 				A3B808211BE2B5630071A0BA /* ALVCollectionView.m */,
 				A39C281A1BE2F62600770010 /* ALVImgurImageCell.h */,
 				A39C281B1BE2F62600770010 /* ALVImgurImageCell.m */,
-				A39C28171BE2E97700770010 /* ALVSearchBar.h */,
-				A39C28181BE2E97700770010 /* ALVSearchBar.m */,
+				A39C28231BE36DC700770010 /* ALVRecentSearchCell.h */,
+				A39C28241BE36DC700770010 /* ALVRecentSearchCell.m */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -335,6 +340,7 @@
 				A3A78B471BE2C77400306D97 /* ALVNetworkInterface.m in Sources */,
 				A3B8081C1BE2B4D30071A0BA /* NSObject+ALVAdditions.m in Sources */,
 				A35A6F041BE2B1E0000834F3 /* ViewController.m in Sources */,
+				A39C28251BE36DC700770010 /* ALVRecentSearchCell.m in Sources */,
 				A3B808221BE2B5630071A0BA /* ALVCollectionView.m in Sources */,
 				A3B8081F1BE2B4F70071A0BA /* UIView+ALVAdditions.m in Sources */,
 				A39C280D1BE2DD4E00770010 /* NSDictionary+ALVAdditions.m in Sources */,

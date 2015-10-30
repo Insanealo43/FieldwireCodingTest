@@ -11,27 +11,37 @@
 /* TODO: Move to Prefix file */
 #import "ALVGlobals.h"
 #import "ALVNetworkInterface.h"
-#import <AFNetworking/AFNetworking.h>
 #import "NSObject+ALVAdditions.h"
+
+#import <AFNetworking/AFNetworking.h>
+#import <ImgurSession/ImgurSession.h>
 #import "MWPhotoBrowser+ALVAdditions.h"
 
-#import <ImgurSession/ImgurSession.h>
+#import "ALVImageManager.h"
 #import "ALVSearchBar.h"
 #import "ALVCollectionView.h"
-#import "ALVImageManager.h"
-#import "ALVImgurImageCell.h"
 #import "ALVImgurImage.h"
+#import "ALVImgurImageCell.h"
+#import "ALVRecentSearchCell.h"
 
 static const CGFloat kCellSpacing = 10;
 static const CGFloat kPagingLoadHeight = 40;
+static const CGFloat kContentHeightMultiplier = 1.75;
+
+static const NSUInteger kMaxNumberSavedPreviousSearches = 10;
+static const CGFloat kRecentSearchLabelHeight = 64;
 
 @interface ViewController () <ALVSearchBarDelegate, IMGSessionDelegate, UICollectionViewDelegate, UICollectionViewDataSource, MWPhotoBrowserDelegate>
 
 @property (strong, nonatomic) ALVSearchBar *customSearchBar;
 @property (strong, nonatomic) ALVCollectionView *imageCollection;
+@property (strong, nonatomic) UICollectionView *searchesCollection;
+@property (strong, nonatomic) UIActivityIndicatorView *loadingSpinner;
+@property (strong, nonatomic) UILabel *recentSearchLabel;
 
 @property (strong, nonatomic) NSMutableArray *imgurImages;
 @property (strong, nonatomic) NSMutableArray *browserPhotos;
+@property (strong, nonatomic) NSMutableArray *recentSearches;
 
 @property (strong, nonatomic) NSNumber *pageNum;
 @property (assign, nonatomic) BOOL isFetchingPage;
@@ -57,10 +67,37 @@ static const CGFloat kPagingLoadHeight = 40;
         // Register cells
         [collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:[UICollectionViewCell className]];
         [collectionView registerClass:[ALVImgurImageCell class] forCellWithReuseIdentifier:[ALVImgurImageCell className]];
+        [collectionView registerClass:[ALVRecentSearchCell class] forCellWithReuseIdentifier:[ALVRecentSearchCell className]];
+        [collectionView registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:[UICollectionReusableView className]];
         
         _imageCollection = collectionView;
     }
     return _imageCollection;
+}
+
+- (UICollectionView *)searchesCollection {
+    if (!_searchesCollection) {
+        UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
+        [flowLayout setScrollDirection:UICollectionViewScrollDirectionVertical];
+        [flowLayout setMinimumInteritemSpacing:0.0];
+        [flowLayout setMinimumLineSpacing:0.0];
+        
+        UICollectionView *collectionView = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:flowLayout];
+        [collectionView setBackgroundColor:[UIColor whiteColor]];
+        [collectionView setAlwaysBounceVertical:YES];
+        [collectionView setContentInset:UIEdgeInsetsMake(0, kCellSpacing, kCellSpacing, kCellSpacing)];
+        [collectionView setDataSource:self];
+        [collectionView setDelegate:self];
+        
+        // Register cells
+        [collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:[UICollectionViewCell className]];
+        [collectionView registerClass:[ALVRecentSearchCell class] forCellWithReuseIdentifier:[ALVRecentSearchCell className]];
+        [collectionView registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:[UICollectionReusableView className]];
+         
+         _searchesCollection = collectionView;
+    }
+    
+    return _searchesCollection;
 }
 
 - (ALVSearchBar *)customSearchBar {
@@ -73,11 +110,44 @@ static const CGFloat kPagingLoadHeight = 40;
     return _customSearchBar;
 }
 
+- (UIActivityIndicatorView *)loadingSpinner {
+    if (!_loadingSpinner) {
+        UIActivityIndicatorView *spinner = [[UIActivityIndicatorView alloc] init];
+        spinner.color = [UIColor grayColor];
+        
+        _loadingSpinner = spinner;
+    }
+    return _loadingSpinner;
+}
+
+- (UILabel *)recentSearchLabel {
+    if (!_recentSearchLabel) {
+        UILabel *label = [[UILabel alloc] init];
+        [label setTextColor:[UIColor blackColor]];
+        [label setFont:[UIFont systemFontOfSize:42]];
+        [label setTextAlignment:NSTextAlignmentLeft];
+        [label setText:@"Recent Searches"];
+        
+        _recentSearchLabel = label;
+    }
+    return _recentSearchLabel;
+}
+
+- (NSMutableArray *)recentSearches {
+    if (!_recentSearches) {
+        _recentSearches = [NSMutableArray new];
+    }
+    return _recentSearches;
+}
+
 - (void)loadView {
     [super loadView];
     
     [self.view addSubview:self.customSearchBar];
     [self.view addSubview:self.imageCollection];
+    [self.view addSubview:self.searchesCollection];
+    
+    [self.imageCollection setHidden:YES];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(thumbnailImageFetchedNotification:) name:kFetchedThumbnailImageNotification object:nil];
 }
@@ -103,10 +173,16 @@ static const CGFloat kPagingLoadHeight = 40;
     [super viewWillLayoutSubviews];
     
     CGFloat yOffset = [[ALVGlobals statusBarHeight] floatValue];
-    [self.customSearchBar setFrame:CGRectMake(0, yOffset, SCREEN_WIDTH, 44)];
+    [self.customSearchBar setFrame:CGRectMake(0, yOffset, SCREEN_WIDTH, 34)];
     
     yOffset += self.customSearchBar.frame.size.height;
     [self.imageCollection setFrame:CGRectMake(0, yOffset, self.view.frame.size.width, self.view.frame.size.height - yOffset)];
+    [self.searchesCollection setFrame:self.imageCollection.frame];
+    
+    [self.loadingSpinner setFrame:CGRectMake(0, 0, self.view.frame.size.width, kPagingLoadHeight)];
+    
+    CGFloat width = self.imageCollection.frame.size.width - 2*kCellSpacing;
+    [self.recentSearchLabel setFrame:CGRectMake(0, 0, width, kRecentSearchLabelHeight)];
 }
 
 #pragma mark - NSNotification Callbacks
@@ -137,10 +213,18 @@ static const CGFloat kPagingLoadHeight = 40;
         
         // Remove all cells
         [self.imageCollection reloadData];
+        //[self.searchesCollection reloadData];
+        
+        BOOL textExists = [searchText length] > 0;
+        [self.searchesCollection setHidden:textExists];
+        [self.imageCollection setHidden:!textExists];
         
         // Start loading animation
         if ([searchText length] > 0) {
             [self.imageCollection animateSpinner:YES];
+            
+        } else {
+            [self.searchesCollection reloadData];
         }
     });
 }
@@ -150,36 +234,21 @@ static const CGFloat kPagingLoadHeight = 40;
     self.browserPhotos = [NSMutableArray new];
     self.pageNum = @0;
     
+    // Save recent search
+    if (searchText.length > 0) {
+        [self.recentSearches insertObject:searchText atIndex:0];
+        
+        // Keep recent searches at a cap
+        if ([self.recentSearches count] > kMaxNumberSavedPreviousSearches) {
+            self.recentSearches = [NSMutableArray arrayWithArray:[self.recentSearches subarrayWithRange:NSMakeRange(0, kMaxNumberSavedPreviousSearches)]];
+        }
+        
+        // Reload recent searches
+        [self.imageCollection reloadData];
+    }
+    
     // Start Infinite Loading of search results
     [self loadImgurImagesForSearch:searchText pageNumber:self.pageNum];
-    
-    
-    /*// Start the image loading for the search term
-    __block NSString *searchTerm = searchText;
-    
-    [ALVImageManager imagesForSearch:searchText pageNumber:self.currentPage completion:^(NSArray *foundImages) {
-        if ([self.customSearchBar.text isEqualToString:searchTerm]) {
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                // Load in the found results
-                self.imgurImages = [NSMutableArray arrayWithArray:foundImages];
-                
-                // Create corresponding photos for the browser
-                NSMutableArray *browserPhotos = [NSMutableArray new];
-                for (ALVImgurImage *imgurImage in foundImages) {
-                    NSURL *photoUrl = [NSURL URLWithString:imgurImage.link];
-                    [browserPhotos addObject:[MWPhoto photoWithURL:photoUrl]];
-                }
-                self.browserPhotos = browserPhotos;
-        
-                // Reload the dataset
-                [self.imageCollection reloadData];
-                
-                // End loading animation
-                [self.imageCollection animateSpinner:NO];
-            });
-        }
-    }];*/
 }
 
 - (void)loadImgurImagesForSearch:(NSString *)searchText pageNumber:(NSNumber *)pageNum {
@@ -265,7 +334,8 @@ static const CGFloat kPagingLoadHeight = 40;
             CGFloat contentHeight = scrollView.contentSize.height;
             
             // Check to see if we hit the bottom of our collection
-            if (offsetY > contentHeight - 2*scrollView.frame.size.height) {
+            if (offsetY > contentHeight - kContentHeightMultiplier*scrollView.frame.size.height) {
+                
                 // Start fetching the next batch of images
                 [self loadImgurImagesForSearch:self.customSearchBar.text pageNumber:@([self.pageNum integerValue] + 1)];
             }
@@ -279,66 +349,128 @@ static const CGFloat kPagingLoadHeight = 40;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return [self.imgurImages count];
+    if ([collectionView isEqual:self.searchesCollection]) {
+        return [self.recentSearches count];
+        
+    } else if ([collectionView isEqual:self.imageCollection]) {
+        return [self.imgurImages count];
+    }
+    
+    return 0;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section {
+    if ([collectionView isEqual:self.searchesCollection]) {
+        if ([self.recentSearches count] > 0) {
+            return self.recentSearchLabel.frame.size;
+        }
+    }
+    
+    return CGSizeMake(self.recentSearchLabel.frame.size.width, 0);
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView
                   layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
-    return CGSizeMake(kImageCellDefaultWidth, kImageCellDefaultHeight);
+    if ([collectionView isEqual:self.searchesCollection]) {
+        return CGSizeMake(self.recentSearchLabel.frame.size.width, kRecentSearchCellDefaultHeight);
+    }
+    
+    CGSize imageCellSize = CGSizeMake(kImageCellDefaultWidth, kImageCellDefaultHeight);
+    return imageCellSize;
+}
+
+- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath {
+    UICollectionReusableView *reuseCell = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:[UICollectionReusableView className] forIndexPath:indexPath];
+    
+    [self.recentSearchLabel removeFromSuperview];
+    
+    if ([collectionView isEqual:self.searchesCollection]) {
+        if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
+            if ([self.customSearchBar.text length] == 0) {
+                [reuseCell addSubview:self.recentSearchLabel];
+            }
+        }
+    }
+    
+    return reuseCell;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:[UICollectionViewCell className] forIndexPath:indexPath];
     
-    __block ALVImgurImage *imageData = [self.imgurImages objectAtIndex:indexPath.row];
-    if (imageData) {
-        __block ALVImgurImageCell *imageCell = [collectionView dequeueReusableCellWithReuseIdentifier:[ALVImgurImageCell className] forIndexPath:indexPath];
+    if ([collectionView isEqual:self.searchesCollection]) {
+        ALVRecentSearchCell *recentSearchCell = [collectionView dequeueReusableCellWithReuseIdentifier:[ALVRecentSearchCell className] forIndexPath:indexPath];
         
-        // Check if we need to fetch the thumbnail image for the cell
-        if (!imageData.thumbnailImage) {
-            [imageCell animteLoading:YES];
-            [ALVImageManager fetchImageWithLink:imageData.thumbnailLink completion:^(UIImage *thumbnailImage) {
-                
-                // Update cell UI
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    // Save the thumbnail on the imgurImage instance
-                    [imageData setThumbnailImage:thumbnailImage];
+        // Set search term text on label here
+        [recentSearchCell.contentView setBackgroundColor:(indexPath.row % 2 == 0 ? [UIColor blueColor] : [UIColor redColor])];
+        
+        cell = recentSearchCell;
+        
+    } else if ([collectionView isEqual:self.imageCollection]) {
+        __block ALVImgurImage *imageData = [self imgurImageForIndexPath:indexPath];
+        
+        if (imageData) {
+            __block ALVImgurImageCell *imageCell = [collectionView dequeueReusableCellWithReuseIdentifier:[ALVImgurImageCell className] forIndexPath:indexPath];
+            
+            // Check if we need to fetch the thumbnail image for the cell
+            if (!imageData.thumbnailImage) {
+                [imageCell animteLoading:YES];
+                [ALVImageManager fetchImageWithLink:imageData.thumbnailLink completion:^(UIImage *thumbnailImage) {
                     
-                    // Update the cell state
-                    [imageCell animteLoading:NO];
-                    imageCell.imageView.image = thumbnailImage;
-                    
-                    // Animate image onto cell
-                    [imageCell fadeImageIn];
-                });
-            }];
+                    // Update cell UI
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        // Save the thumbnail on the imgurImage instance
+                        [imageData setThumbnailImage:thumbnailImage];
+                        
+                        // Update the cell state
+                        [imageCell animteLoading:NO];
+                        imageCell.imageView.image = thumbnailImage;
+                        
+                        // Animate image onto cell
+                        [imageCell fadeImageIn];
+                    });
+                }];
+            }
+            
+            cell = imageCell;
+            
+        } else {
+            // Loading Cell
+            if (self.isFetchingPage) {
+                [self.loadingSpinner startAnimating];
+                [cell.contentView addSubview:self.loadingSpinner];
+            }
         }
-        
-        cell = imageCell;
     }
     
     return cell;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
-    ALVImgurImage *imageData = [self.imgurImages objectAtIndex:indexPath.row];
-    if (imageData) {
-        // Prepare cell initial state
-        ALVImgurImageCell *imageCell = (id)cell;
-        
-        [imageCell.imageView setImage:imageData.thumbnailImage];
-        [imageCell animteLoading:!imageData.thumbnailImage];
+    if ([collectionView isEqual:self.imageCollection]) {
+        if ([self.customSearchBar.text length] > 0) {
+            ALVImgurImage *imageData = [self.imgurImages objectAtIndex:indexPath.row];
+            if (imageData) {
+                // Prepare cell initial state
+                ALVImgurImageCell *imageCell = (id)cell;
+                
+                [imageCell.imageView setImage:imageData.thumbnailImage];
+                [imageCell animteLoading:!imageData.thumbnailImage];
+            }
+        }
     }
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    ALVImgurImage *imgurImage = [self imgurImageForIndexPath:indexPath];
-    if (imgurImage) {
-        // Push the browser gallery onto the stack
-        MWPhotoBrowser *browser = [MWPhotoBrowser photoBrowserWithDelegate:self];
-        [browser setCurrentPhotoIndex:indexPath.row];
-        
-        [self.navigationController pushViewController:browser animated:YES];
+    if ([collectionView isEqual:self.imageCollection]) {
+        ALVImgurImage *imgurImage = [self imgurImageForIndexPath:indexPath];
+        if (imgurImage) {
+            // Push the browser gallery onto the stack
+            MWPhotoBrowser *browser = [MWPhotoBrowser photoBrowserWithDelegate:self];
+            [browser setCurrentPhotoIndex:indexPath.row];
+            
+            [self.navigationController pushViewController:browser animated:YES];
+        }
     }
 }
 
