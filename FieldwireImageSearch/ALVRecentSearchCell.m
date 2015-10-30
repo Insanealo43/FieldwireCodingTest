@@ -9,6 +9,7 @@
 #import "ALVRecentSearchCell.h"
 
 const CGFloat kRecentSearchCellDefaultHeight = 32;
+static const CGFloat kLabelLeftInset = 15;
 
 @implementation ALVRecentSearchCell
 
@@ -48,7 +49,7 @@ const CGFloat kRecentSearchCellDefaultHeight = 32;
 - (void)layoutSubviews {
     [super layoutSubviews];
     
-    [self.recentSearchLabel setFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
+    [self.recentSearchLabel setFrame:CGRectMake(kLabelLeftInset, 0, self.frame.size.width - kLabelLeftInset, self.frame.size.height)];
 }
 
 - (void)setHighlighted:(BOOL)highlighted {

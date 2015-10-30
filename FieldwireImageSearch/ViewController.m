@@ -149,7 +149,15 @@ static const CGFloat kRecentSearchLabelHeight = 64;
     
     [self.imageCollection setHidden:YES];
     
+    // Setup notification observers
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(thumbnailImageFetchedNotification:) name:kFetchedThumbnailImageNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillChange:) name:UIKeyboardDidChangeFrameNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardAppeared:) name:UIKeyboardDidShowNotification object:nil];
+    
+    // Load Recent Searches from User Default
+    NSString *classRecentSearchesKey = [NSString stringWithFormat:@"%@.recentSearches", [self className]];
+    NSArray *recentSearches = [[NSUserDefaults standardUserDefaults] objectForKey:classRecentSearchesKey];
+    self.recentSearches = [NSMutableArray arrayWithArray:recentSearches];
 }
 
 - (void)viewDidLoad {
@@ -202,6 +210,20 @@ static const CGFloat kRecentSearchLabelHeight = 64;
     }
 }
 
+- (void)keyboardAppeared:(NSNotification *)notification {
+    CGRect keyboardRect = [notification.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    keyboardRect = [self.view convertRect:keyboardRect fromView:nil];
+    
+    //[self.imageCollection setContentInset:UIEdgeInsetsMake(0, kCellSpacing, kCellSpacing + keyboardRect.size.height, kCellSpacing)];
+}
+
+- (void)keyboardWillChange:(NSNotification *)notification {
+    CGRect keyboardRect = [notification.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    keyboardRect = [self.view convertRect:keyboardRect fromView:nil];
+    
+    //[self.imageCollection setContentInset:UIEdgeInsetsMake(0, kCellSpacing, kCellSpacing + keyboardRect.size.height, kCellSpacing)];
+}
+
 #pragma mark - ALVSearchBarDelegate Methods
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
     // Clear previous dataset states
@@ -218,6 +240,7 @@ static const CGFloat kRecentSearchLabelHeight = 64;
     dispatch_async(dispatch_get_main_queue(), ^{
         
         // Remove all cells
+        [self.imageCollection.collectionViewLayout invalidateLayout];
         [self.imageCollection reloadData];
 
         // Start loading animation
@@ -225,7 +248,24 @@ static const CGFloat kRecentSearchLabelHeight = 64;
             [self.imageCollection animateSpinner:YES];
             
         } else {
+            [self.searchesCollection.collectionViewLayout invalidateLayout];
             [self.searchesCollection reloadData];
+        }
+    });
+}
+
+- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [searchBar resignFirstResponder];
+        
+        // Check if we didnt find any results
+        if ([self.customSearchBar.text length] > 0 && !self.pageNum && [self.imgurImages count] == 0) {
+            
+            // Clear page number
+            self.pageNum = nil;
+            
+            // Show alert
+            [self showNoResultsAlert];
         }
     });
 }
@@ -244,7 +284,12 @@ static const CGFloat kRecentSearchLabelHeight = 64;
             self.recentSearches = [NSMutableArray arrayWithArray:[self.recentSearches subarrayWithRange:NSMakeRange(0, kMaxNumberSavedPreviousSearches)]];
         }
         
+        // Update the User Defaults
+        NSString *classRecentSearchesKey = [NSString stringWithFormat:@"%@.recentSearches", [self className]];
+        [[NSUserDefaults standardUserDefaults] setObject:self.recentSearches forKey:classRecentSearchesKey];
+        
         // Reload recent searches
+        [self.searchesCollection.collectionViewLayout invalidateLayout];
         [self.searchesCollection reloadData];
     }
     
@@ -271,17 +316,16 @@ static const CGFloat kRecentSearchLabelHeight = 64;
                 
                 // Check if we didnt find any results
                 if ([searchText length] > 0 && [pageNum isEqual:@0] && [foundImages count] == 0) {
-                    // Clear page number
-                    self.pageNum = nil;
-                    
-                    // Show alert
-                    NSString *title = @"No Results Found";
-                    NSString *message = [NSString stringWithFormat:@"Could not find any images matching:\n\'%@\'.\n\nPlease modify your search.", searchText];
-                    
-                    UIAlertView *noResultsAlert = [[UIAlertView alloc] initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
-                    [noResultsAlert show];
-                    
-                    return;
+                     
+                    // Only show alert when the keyboard is retracted
+                    if (![self.customSearchBar isFirstResponder]) {
+                        // Clear page number
+                        self.pageNum = nil;
+                        
+                        // Show alert
+                        [self showNoResultsAlert];
+                        return;
+                    }
                 }
                 
                 // Update current page number
@@ -322,6 +366,15 @@ static const CGFloat kRecentSearchLabelHeight = 64;
             }
         }];
     }
+}
+
+- (void)showNoResultsAlert {
+    // Show alert
+    NSString *title = @"No Results Found";
+    NSString *message = [NSString stringWithFormat:@"Could not find any images matching:\n\'%@\'.\n\nPlease modify your search.", self.customSearchBar.text];
+    
+    UIAlertView *noResultsAlert = [[UIAlertView alloc] initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+    [noResultsAlert show];
 }
 
 #pragma mark - UIScrollViewDelegate Methods
@@ -404,7 +457,6 @@ static const CGFloat kRecentSearchLabelHeight = 64;
         
         // Set search term text on label here
         [recentSearchCell.recentSearchLabel setText:[self.recentSearches objectAtIndex:indexPath.row]];
-        //[recentSearchCell.contentView setBackgroundColor:(indexPath.row % 2 == 0 ? [UIColor blueColor] : [UIColor redColor])];
         
         cell = recentSearchCell;
         
@@ -464,6 +516,15 @@ static const CGFloat kRecentSearchLabelHeight = 64;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+    // Resign the keyboard whenever the user taps inside a collection
+    if ([self.customSearchBar isFirstResponder]) {
+        [self.customSearchBar resignFirstResponder];
+        
+        // Allow the user to view the full image results
+        if ([collectionView isEqual:self.imageCollection])
+            return;
+    }
+    
     if ([collectionView isEqual:self.imageCollection]) {
         ALVImgurImage *imgurImage = [self imgurImageForIndexPath:indexPath];
         if (imgurImage) {
