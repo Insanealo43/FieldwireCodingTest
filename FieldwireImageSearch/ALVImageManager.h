@@ -14,6 +14,8 @@
 + (ALVImageManager *)sharedInstance;
 
 + (void)imagesForSearch:(NSString *)searchString completion:(void(^)(NSArray *imgurImages)) block;
++ (void)imagesForSearch:(NSString *)searchString pageNumber:(NSNumber *)pageNum completion:(void (^)(NSArray *))block;
+
 + (void)fetchImageWithId:(NSString *)identifier completion:(void(^)(UIImage *imgurImage)) block;
 + (void)fetchImageWithLink:(NSString *)link completion:(void (^)(UIImage *))block;
 

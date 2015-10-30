@@ -23,6 +23,7 @@
 #import "ALVImgurImage.h"
 
 static const CGFloat kCellSpacing = 10;
+static const CGFloat kPagingLoadHeight = 40;
 
 @interface ViewController () <ALVSearchBarDelegate, IMGSessionDelegate, UICollectionViewDelegate, UICollectionViewDataSource, MWPhotoBrowserDelegate>
 
@@ -31,6 +32,7 @@ static const CGFloat kCellSpacing = 10;
 
 @property (strong, nonatomic) NSMutableArray *imgurImages;
 @property (strong, nonatomic) NSMutableArray *browserPhotos;
+//@property (strong, nonatomic) NSNumber *currentPage;
 
 @end
 
@@ -87,7 +89,7 @@ static const CGFloat kCellSpacing = 10;
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    [self.navigationController.navigationBar setHidden:YES]; 
+    [self.navigationController.navigationBar setHidden:YES];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -125,9 +127,12 @@ static const CGFloat kCellSpacing = 10;
 #pragma mark - ALVSearchBarDelegate Methods
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
     dispatch_async(dispatch_get_main_queue(), ^{
-        // Clear previous datasets
+        // Clear previous dataset states
         self.imgurImages = nil;
         self.browserPhotos = nil;
+        //self.currentPage = nil;
+        
+        // Remove all cells
         [self.imageCollection reloadData];
         
         // Start loading animation
@@ -136,10 +141,18 @@ static const CGFloat kCellSpacing = 10;
 }
 
 - (void)searchBar:(ALVSearchBar *)searchBar timedTriggeredTextChange:(NSString *)searchText {
-    // Start the image loading for the search term
+    self.imgurImages = [NSMutableArray new];
+    self.browserPhotos = [NSMutableArray new];
+    //self.currentPage = @0;
+    
+    // Start Infinite Loading of search results
+    [self loadImgurImagesForSearch:searchText pageNumber:@0];
+    
+    
+    /*// Start the image loading for the search term
     __block NSString *searchTerm = searchText;
     
-    [ALVImageManager imagesForSearch:searchText completion:^(NSArray *foundImages) {
+    [ALVImageManager imagesForSearch:searchText pageNumber:self.currentPage completion:^(NSArray *foundImages) {
         if ([self.customSearchBar.text isEqualToString:searchTerm]) {
             
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -161,7 +174,49 @@ static const CGFloat kCellSpacing = 10;
                 [self.imageCollection animateSpinner:NO];
             });
         }
-    }];
+    }];*/
+}
+
+- (void)loadImgurImagesForSearch:(NSString *)searchText pageNumber:(NSNumber *)pageNum {
+    if ([searchText isEqualToString:self.customSearchBar.text]) {
+        
+        // Start the image loading for the search term
+        [ALVImageManager imagesForSearch:searchText pageNumber:pageNum completion:^(NSArray *foundImages) {
+            if ([self.customSearchBar.text isEqualToString:searchText]) {
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    // Load in the found results
+                    [self.imgurImages addObjectsFromArray:foundImages];
+                    
+                    // Create corresponding photos for the browser
+                    NSMutableArray *browserPhotos = [NSMutableArray new];
+                    for (ALVImgurImage *imgurImage in foundImages) {
+                        NSURL *photoUrl = [NSURL URLWithString:imgurImage.link];
+                        [browserPhotos addObject:[MWPhoto photoWithURL:photoUrl]];
+                    }
+                    [self.browserPhotos addObjectsFromArray:browserPhotos];
+                    
+                    // Insert the new index paths for the fetched images
+                    NSMutableArray *insertedIndexPaths = [NSMutableArray new];
+                    for (ALVImgurImage *image in foundImages) {
+                        NSIndexPath *indexPath = [self indexPathForImgurImage:image];
+                        if (indexPath) {
+                            [insertedIndexPaths addObject:indexPath];
+                        }
+                    }
+                    [self.imageCollection insertItemsAtIndexPaths:insertedIndexPaths];
+                    
+                    // End loading animation
+                    [self.imageCollection animateSpinner:NO];
+                    
+                    // Check if we need to start fetching the next page
+                    if ([foundImages count] > 0) {
+                        [self loadImgurImagesForSearch:searchText pageNumber:@([pageNum integerValue] + 1)];
+                    }
+                });
+            }
+        }];
+    }
 }
 
 #pragma mark - ALVCollectionViewDelegate Callbacks

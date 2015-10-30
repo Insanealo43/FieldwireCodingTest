@@ -31,14 +31,18 @@ static NSString *const kImageJpegType = @"image/jpeg";
 }
 
 + (void)imagesForSearch:(NSString *)searchString completion:(void(^)(NSArray *imgurImages)) block {
+    [self imagesForSearch:searchString pageNumber:@0 completion:block];
+}
+
++ (void)imagesForSearch:(NSString *)searchString pageNumber:(NSNumber *)pageNum completion:(void (^)(NSArray *))block {
     __block NSMutableArray *fetchedImages = [NSMutableArray new];
-    if ([searchString length] > 0) {
+    if ([searchString length] > 0 && [pageNum integerValue] >= 0) {
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             // https://api.imgur.com/3/gallery/search/2?q=%@
-            NSString *imageSearchEndpoint = [NSString stringWithFormat:@"https://api.imgur.com/3/gallery/search/1?q=%@", searchString];
+            NSString *imageSearchEndpoint = [NSString stringWithFormat:@"https://api.imgur.com/3/gallery/search/%@?q=%@", pageNum, searchString];
             NSString *urlEncodedString = [imageSearchEndpoint stringByAddingPercentEscapesUsingEncoding:
-                                    NSUTF8StringEncoding];
+                                          NSUTF8StringEncoding];
             
             NSMutableURLRequest *request = [[self sharedInstance] getUrlRequestWithString:urlEncodedString];
             
@@ -51,15 +55,15 @@ static NSString *const kImageJpegType = @"image/jpeg";
                                        // Parse the response
                                        if (data) {
                                            NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data
-                                                                                  options:0
-                                                                                    error:nil];
+                                                                                                options:0
+                                                                                                  error:nil];
                                            
                                            NSLog(@"%@ Images Found: %@", searchString, json);
                                            fetchedImages = [[self sharedInstance] parseImgurImages:json];
                                        }
                                        
                                        if (block) block (fetchedImages);
-            }];
+                                   }];
             NSLog(@"Request FIRED!");
         });
         
