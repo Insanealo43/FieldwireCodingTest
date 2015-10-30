@@ -356,9 +356,11 @@ static const CGFloat kRecentSearchLabelHeight = 64;
                     }
                 }
                 
-                // Append to the current image collection
+                // Append to the image collection
                 if ([insertedIndexPaths count] > 0) {
-                    [self.imageCollection insertItemsAtIndexPaths:insertedIndexPaths];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self.imageCollection insertItemsAtIndexPaths:insertedIndexPaths];
+                    });
                 }
                 
                 // Check if we are done fetching the image results
