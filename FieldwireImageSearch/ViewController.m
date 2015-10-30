@@ -19,8 +19,7 @@
 #import "ALVCollectionView.h"
 #import "ALVImageManager.h"
 #import "ALVImgurImageCell.h"
-
-static const CGFloat kSpinnerDefaultDimension = 60;
+#import "ALVImgurImage.h"
 
 @interface ViewController () <ALVSearchBarDelegate, IMGSessionDelegate, UICollectionViewDelegate, UICollectionViewDataSource>
 
@@ -69,7 +68,9 @@ static const CGFloat kSpinnerDefaultDimension = 60;
     [super loadView];
     
     [self.view addSubview:self.customSearchBar];
-    [self.view addSubview:self.imageCollection];    
+    [self.view addSubview:self.imageCollection];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(thumbnailImageFetchedNotification:) name:kFetchedThumbnailImageNotification object:nil];
 }
 
 - (void)viewDidLoad {
@@ -86,7 +87,7 @@ static const CGFloat kSpinnerDefaultDimension = 60;
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-
+    
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -101,6 +102,29 @@ static const CGFloat kSpinnerDefaultDimension = 60;
     
     yOffset += self.customSearchBar.frame.size.height;
     [self.imageCollection setFrame:CGRectMake(0, yOffset, self.view.frame.size.width, self.view.frame.size.height - yOffset)];
+}
+
+#pragma mark - NSNotification Callbacks
+- (void)thumbnailImageFetchedNotification:(NSNotification *)notification {
+    if (notification.object) {
+        // Check if the image needs to be updated in this controller
+        if ([self.imgurImages containsObject:notification.object]) {
+            ALVImgurImage *imgurImage = notification.object;
+            
+            NSUInteger imageIndex = [self.imgurImages indexOfObject:notification.object];
+            NSIndexPath *imageIndexPath = [NSIndexPath indexPathForRow:imageIndex inSection:0];
+            
+            // Validate index path of image cell
+            if ([self.imageCollection numberOfSections] > 0) {
+                if ([self.imageCollection numberOfItemsInSection:0] > imageIndexPath.row) {
+                    
+                    // Reconfigure the cell
+                    ALVImgurImageCell *imageCell = (id)[self.imageCollection cellForItemAtIndexPath:imageIndexPath];
+                    [imageCell setImageData:imgurImage];
+                }
+            }
+        }
+    }
 }
 
 #pragma mark - ALVSearchBarDelegate Methods

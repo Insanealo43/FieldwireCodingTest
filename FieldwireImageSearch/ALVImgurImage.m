@@ -11,6 +11,9 @@
 #import <SDWebImage/UIImageView+WebCache.h>
 #import "ALVImageManager.h"
 
+NSString *const kFetchedThumbnailImageNotification = @"ALVImgurImage.fetchedThumbnailNotification";
+NSString *const kFetchedImageNotification = @"ALVImgurImage.fetchedNotification";
+
 static NSString *const kLinkKey = @"link";
 static NSString *const kIdKey = @"id";
 
@@ -25,14 +28,54 @@ static NSString *const kIdKey = @"id";
 
 - (void)setLink:(NSString *)link {
     _link = link;
+    _fetchedImage = nil;
     
     // Start fetching Image from url
     if ([link length] > 0) {
-        [ALVImageManager fetchImageWithId:link completion:^(UIImage *image) {
-            // Notify app that image was fetched and use KVO to listen on image change properties
-            _fetchedImage = image;
+        
+        // Fetch the thumbnail of the image
+        [ALVImageManager fetchImageWithLink:[self thumbnailLink] completion:^(UIImage *image) {
+            if (image) {
+                // Setter Method for KVO observers
+                [self setThumbnailImage:image];
+                
+                // Notification for fetched image
+                NSNotification *notification = [NSNotification notificationWithName:kFetchedThumbnailImageNotification object:self];
+                [[NSNotificationCenter defaultCenter] postNotification:notification];
+                NSLog(@"Posting Fetched Image THUMBNAIL Notification!");
+            }
+        }];
+        
+        // Fetch the full sized image
+        [ALVImageManager fetchImageWithLink:link completion:^(UIImage *image) {
+            if (image) {
+                // Setter Method for KVO observers
+                [self setFetchedImage:image];
+                
+                // Notification for fetched image
+                NSNotification *notification = [NSNotification notificationWithName:kFetchedImageNotification object:self];
+                [[NSNotificationCenter defaultCenter] postNotification:notification];
+                NSLog(@"Posting Fetched Image Notification!");
+            }
         }];
     }
+}
+
+- (NSString *)thumbnailLink {
+    NSMutableArray *linkComponents = [[self.link componentsSeparatedByString:@"."] mutableCopy];
+    if ([linkComponents count] > 1) {
+        // Grab 2nd last component and append thumbnail extension
+        NSUInteger extensionIndex = [linkComponents count] - 2;
+        NSString *extension = [linkComponents objectAtIndex:extensionIndex];
+        
+        extension = [extension stringByAppendingString:@"s"];
+        [linkComponents replaceObjectAtIndex:extensionIndex withObject:extension];
+        
+        NSString *thumbnailLink = [linkComponents componentsJoinedByString:@"."];
+        return thumbnailLink;
+    }
+    
+    return nil;
 }
 
 @end

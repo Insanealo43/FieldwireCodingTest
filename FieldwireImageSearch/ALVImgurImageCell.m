@@ -72,7 +72,16 @@ const CGFloat kImageCellDefaultHeight = 64;
 
 - (void)setImageData:(ALVImgurImage *)imageData {
     _imageData = imageData;
-    [self.imageView setImage:nil];
+    self.imageView.image = imageData.thumbnailImage;
+    
+    [self.spinner removeFromSuperview];
+    if (!imageData.thumbnailImage) {
+        [self.spinner startAnimating];
+        [self.imageView addSubview:self.spinner];
+    }
+    
+    
+    /*[self.imageView setImage:nil];
     
     [self.spinner removeFromSuperview];
     if (!imageData.fetchedImage) {
@@ -96,7 +105,7 @@ const CGFloat kImageCellDefaultHeight = 64;
                                       
         }];*/
         
-        [self.spinner startAnimating];
+        /*[self.spinner startAnimating];
         [self.imageView addSubview:self.spinner];
         
         SDWebImageDownloader *downloader = [SDWebImageDownloader sharedDownloader];
@@ -119,7 +128,7 @@ const CGFloat kImageCellDefaultHeight = 64;
                                    [self.spinner removeFromSuperview];
                                }];
          
-    }
+    }*/
 }
 
 @end

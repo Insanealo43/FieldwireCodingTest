@@ -9,8 +9,12 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+extern NSString *const kFetchedThumbnailImageNotification;
+extern NSString *const kFetchedImageNotification;
+
 @interface ALVImgurImage : NSObject
 
+@property (nonatomic, strong) UIImage *thumbnailImage;
 @property (nonatomic, strong) UIImage *fetchedImage;
 
 @property (nonatomic, copy) NSString *identifier;

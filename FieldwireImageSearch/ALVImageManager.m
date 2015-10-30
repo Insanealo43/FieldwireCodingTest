@@ -8,6 +8,7 @@
 
 #import "ALVImageManager.h"
 #import "NSDictionary+ALVAdditions.h"
+#import <SDWebImage/UIImageView+WebCache.h>
 #import "ALVNetworkInterface.h"
 #import "ALVImgurImage.h"
 
@@ -81,6 +82,24 @@ static NSString *const kDataKey = @"data";
                                    }
                                    
                                    if (block) block (nil);
+                               }];
+        
+    } else {
+        if (block) block (nil);
+    }
+}
+
++ (void)fetchImageWithLink:(NSString *)link completion:(void (^)(UIImage *))block {
+    if ([link length] > 0) {
+        SDWebImageDownloader *downloader = [SDWebImageDownloader sharedDownloader];
+        [downloader downloadImageWithURL:[NSURL URLWithString:link]
+                                 options:0
+                                progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+                                    // progression tracking code
+                                    
+                                }
+                               completed:^(UIImage *image, NSData *data, NSError *error, BOOL finished) {
+                                   if (block) block (image);
                                }];
         
     } else {
