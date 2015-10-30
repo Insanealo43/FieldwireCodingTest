@@ -136,7 +136,9 @@ static const CGFloat kPagingLoadHeight = 40;
         [self.imageCollection reloadData];
         
         // Start loading animation
-        [self.imageCollection animateSpinner:YES];
+        if ([searchText length] > 0) {
+            [self.imageCollection animateSpinner:YES];
+        }
     });
 }
 
@@ -182,9 +184,25 @@ static const CGFloat kPagingLoadHeight = 40;
         
         // Start the image loading for the search term
         [ALVImageManager imagesForSearch:searchText pageNumber:pageNum completion:^(NSArray *foundImages) {
+            
+            // Ensure we are still dealing with the same state
             if ([self.customSearchBar.text isEqualToString:searchText]) {
                 
                 dispatch_async(dispatch_get_main_queue(), ^{
+                    // End loading animation
+                    [self.imageCollection animateSpinner:NO];
+                    
+                    // Check if we didnt find any results
+                    if ([searchText length] > 0 && [pageNum isEqual:@0] && [foundImages count] == 0) {
+                        NSString *title = @"No Results Found";
+                        NSString *message = [NSString stringWithFormat:@"Could not find any images matching:\n\'%@\'.\n\nPlease modify your search.", searchText];
+                        
+                        UIAlertView *noResultsAlert = [[UIAlertView alloc] initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+                        [noResultsAlert show];
+                        
+                        return;
+                    }
+                    
                     // Load in the found results
                     [self.imgurImages addObjectsFromArray:foundImages];
                     
@@ -205,9 +223,6 @@ static const CGFloat kPagingLoadHeight = 40;
                         }
                     }
                     [self.imageCollection insertItemsAtIndexPaths:insertedIndexPaths];
-                    
-                    // End loading animation
-                    [self.imageCollection animateSpinner:NO];
                     
                     // Check if we need to start fetching the next page
                     if ([foundImages count] > 0) {
