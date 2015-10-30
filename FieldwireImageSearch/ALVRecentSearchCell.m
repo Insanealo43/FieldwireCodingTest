@@ -12,6 +12,7 @@ const CGFloat kRecentSearchCellDefaultHeight = 32;
 
 static const CGFloat kLabelLeftInset = 15;
 static const CGFloat kSearchIconInset = 15;
+static const CGFloat kPadding = 10;
 static NSString *const kLabelTextKeyPath = @"text";
 
 @interface ALVRecentSearchCell ()
@@ -86,7 +87,7 @@ static NSString *const kLabelTextKeyPath = @"text";
     
     CGFloat xOffset = kLabelLeftInset;
     [self.searchIcon setFrame:CGRectMake(xOffset, 0, self.frame.size.height, self.frame.size.height)];
-    xOffset += self.searchIcon.frame.size.width;
+    xOffset += self.searchIcon.frame.size.width + kPadding;
     
     [self.recentSearchLabel setFrame:CGRectMake(xOffset, 0, self.frame.size.width - xOffset, self.frame.size.height)];
 }
