@@ -124,7 +124,7 @@ static const CGFloat kRecentSearchLabelHeight = 64;
     if (!_recentSearchLabel) {
         UILabel *label = [[UILabel alloc] init];
         [label setTextColor:[UIColor blackColor]];
-        [label setFont:[UIFont systemFontOfSize:42]];
+        [label setFont:[UIFont systemFontOfSize:36]];
         [label setTextAlignment:NSTextAlignmentLeft];
         [label setText:@"Recent Searches"];
         
@@ -158,6 +158,11 @@ static const CGFloat kRecentSearchLabelHeight = 64;
     NSString *classRecentSearchesKey = [NSString stringWithFormat:@"%@.recentSearches", [self className]];
     NSArray *recentSearches = [[NSUserDefaults standardUserDefaults] objectForKey:classRecentSearchesKey];
     self.recentSearches = [NSMutableArray arrayWithArray:recentSearches];
+    
+    // Launch the keyboard if no searches
+    if ([self.recentSearches count] == 0) {
+        [self.customSearchBar becomeFirstResponder];
+    }
 }
 
 - (void)viewDidLoad {
@@ -351,10 +356,10 @@ static const CGFloat kRecentSearchLabelHeight = 64;
                     }
                 }
                 
-                // Update the image collection UI
-                dispatch_async(dispatch_get_main_queue(), ^{
+                // Append to the current image collection
+                if ([insertedIndexPaths count] > 0) {
                     [self.imageCollection insertItemsAtIndexPaths:insertedIndexPaths];
-                });
+                }
                 
                 // Check if we are done fetching the image results
                 if ([foundImages count] == 0) {

@@ -9,7 +9,16 @@
 #import "ALVRecentSearchCell.h"
 
 const CGFloat kRecentSearchCellDefaultHeight = 32;
+
 static const CGFloat kLabelLeftInset = 15;
+static const CGFloat kSearchIconInset = 15;
+static NSString *const kLabelTextKeyPath = @"text";
+
+@interface ALVRecentSearchCell ()
+
+@property (strong, nonatomic) UIImageView *searchIcon;
+
+@end
 
 @implementation ALVRecentSearchCell
 
@@ -18,12 +27,35 @@ static const CGFloat kLabelLeftInset = 15;
         UILabel *label = [[UILabel alloc] init];
         [label setTextColor:[UIColor grayColor]];
         [label setFont:[UIFont systemFontOfSize:24]];
-        [label setTextAlignment:NSTextAlignmentCenter];
+        [label setTextAlignment:NSTextAlignmentLeft];
         
         _recentSearchLabel = label;
     }
     
     return _recentSearchLabel;
+}
+
+- (UIImageView *)searchIcon {
+    if (!_searchIcon) {
+        UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"searchIconTransparent"]];
+        [imageView setClipsToBounds:YES];
+        
+        _searchIcon = imageView;
+    }
+    return _searchIcon;
+}
+
+- (void)dealloc {
+    [self.recentSearchLabel removeObserver:self forKeyPath:kLabelTextKeyPath];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
+    if ([object isEqual:self.recentSearchLabel]) {
+        if ([keyPath isEqualToString:kLabelTextKeyPath]) {
+            // Update label size
+            [self layoutSubviews];
+        }
+    }
 }
 
 - (instancetype)init {
@@ -44,12 +76,19 @@ static const CGFloat kLabelLeftInset = 15;
 
 - (void)configureCell {
     [self.contentView addSubview:self.recentSearchLabel];
+    [self.contentView addSubview:self.searchIcon];
+    
+    [self.recentSearchLabel addObserver:self forKeyPath:@"text" options:NSKeyValueObservingOptionNew context:nil];
 }
 
 - (void)layoutSubviews {
     [super layoutSubviews];
     
-    [self.recentSearchLabel setFrame:CGRectMake(kLabelLeftInset, 0, self.frame.size.width - kLabelLeftInset, self.frame.size.height)];
+    CGFloat xOffset = kLabelLeftInset;
+    [self.searchIcon setFrame:CGRectMake(xOffset, 0, self.frame.size.height, self.frame.size.height)];
+    xOffset += self.searchIcon.frame.size.width;
+    
+    [self.recentSearchLabel setFrame:CGRectMake(xOffset, 0, self.frame.size.width - xOffset, self.frame.size.height)];
 }
 
 - (void)setHighlighted:(BOOL)highlighted {

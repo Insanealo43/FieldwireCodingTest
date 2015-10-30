@@ -29,36 +29,7 @@ static NSString *const kIdKey = @"id";
 - (void)setLink:(NSString *)link {
     _link = link;
     _fetchedImage = nil;
-    
-    // Start fetching Image from url
-    /*if ([link length] > 0) {
-        
-        // Fetch the thumbnail of the image
-        [ALVImageManager fetchImageWithLink:[self thumbnailLink] completion:^(UIImage *image) {
-            if (image) {
-                // Setter Method for KVO observers
-                [self setThumbnailImage:image];
-                
-                // Notification for fetched image
-                NSNotification *notification = [NSNotification notificationWithName:kFetchedThumbnailImageNotification object:self];
-                [[NSNotificationCenter defaultCenter] postNotification:notification];
-                NSLog(@"Posting Fetched Image THUMBNAIL Notification!");
-            }
-        }];
-        
-        // Fetch the full sized image
-        [ALVImageManager fetchImageWithLink:link completion:^(UIImage *image) {
-            if (image) {
-                // Setter Method for KVO observers
-                [self setFetchedImage:image];
-                
-                // Notification for fetched image
-                NSNotification *notification = [NSNotification notificationWithName:kFetchedImageNotification object:self];
-                [[NSNotificationCenter defaultCenter] postNotification:notification];
-                NSLog(@"Posting Fetched Image Notification!");
-            }
-        }];
-    }*/
+    _thumbnailImage = nil;
 }
 
 - (NSString *)thumbnailLink {
