@@ -24,12 +24,13 @@
 
 static const CGFloat kCellSpacing = 10;
 
-@interface ViewController () <ALVSearchBarDelegate, IMGSessionDelegate, UICollectionViewDelegate, UICollectionViewDataSource>
+@interface ViewController () <ALVSearchBarDelegate, IMGSessionDelegate, UICollectionViewDelegate, UICollectionViewDataSource, MWPhotoBrowserDelegate>
 
 @property (strong, nonatomic) ALVSearchBar *customSearchBar;
 @property (strong, nonatomic) ALVCollectionView *imageCollection;
 
 @property (strong, nonatomic) NSMutableArray *imgurImages;
+@property (strong, nonatomic) NSMutableArray *browserPhotos;
 
 @end
 
@@ -124,8 +125,9 @@ static const CGFloat kCellSpacing = 10;
 #pragma mark - ALVSearchBarDelegate Methods
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
     dispatch_async(dispatch_get_main_queue(), ^{
-        // Clear previous dataset
+        // Clear previous datasets
         self.imgurImages = nil;
+        self.browserPhotos = nil;
         [self.imageCollection reloadData];
         
         // Start loading animation
@@ -143,48 +145,23 @@ static const CGFloat kCellSpacing = 10;
             dispatch_async(dispatch_get_main_queue(), ^{
                 // Load in the found results
                 self.imgurImages = [NSMutableArray arrayWithArray:foundImages];
-                [self.imageCollection reloadData];
                 
+                // Create corresponding photos for the browser
+                NSMutableArray *browserPhotos = [NSMutableArray new];
+                for (ALVImgurImage *imgurImage in foundImages) {
+                    NSURL *photoUrl = [NSURL URLWithString:imgurImage.link];
+                    [browserPhotos addObject:[MWPhoto photoWithURL:photoUrl]];
+                }
+                self.browserPhotos = browserPhotos;
+        
+                // Reload the dataset
+                [self.imageCollection reloadData];
                 
                 // End loading animation
                 [self.imageCollection animateSpinner:NO];
             });
         }
     }];
-}
-
-- (ALVImgurImage *)imgurImageForIndexPath:(NSIndexPath *)indexPath {
-    // Validate section
-    switch (indexPath.section) {
-        case 0: {
-            // Validate row
-            if (indexPath.row < [self.imgurImages count]) {
-                id imgurImage = [self.imgurImages objectAtIndex:indexPath.row];
-                
-                // Validate class
-                if ([[imgurImage class] isSubclassOfClass:[ALVImgurImage class]]) {
-                    return imgurImage;
-                }
-            }
-            break;
-        }
-            
-        default:
-            break;
-    }
-    
-    return nil;
-}
-
-- (NSIndexPath *)indexPathForImgurImage:(ALVImgurImage *)imgurImage {
-    if ([self.imgurImages containsObject:imgurImage]) {
-        NSUInteger section = 0;
-        NSUInteger row = [self.imgurImages indexOfObject:imgurImage];
-        
-        return [NSIndexPath indexPathForItem:row inSection:section];
-    }
-    
-    return nil;
 }
 
 #pragma mark - ALVCollectionViewDelegate Callbacks
@@ -246,7 +223,61 @@ static const CGFloat kCellSpacing = 10;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+    ALVImgurImage *imgurImage = [self imgurImageForIndexPath:indexPath];
+    if (imgurImage) {
+        // Push the browser gallery onto the stack
+        MWPhotoBrowser *browser = [MWPhotoBrowser photoBrowserWithDelegate:self];
+        [browser setCurrentPhotoIndex:indexPath.row];
+        
+        [self.navigationController pushViewController:browser animated:YES];
+    }
+}
+
+- (ALVImgurImage *)imgurImageForIndexPath:(NSIndexPath *)indexPath {
+    // Validate section
+    switch (indexPath.section) {
+        case 0: {
+            // Validate row
+            if (indexPath.row < [self.imgurImages count]) {
+                id imgurImage = [self.imgurImages objectAtIndex:indexPath.row];
+                
+                // Validate class
+                if ([[imgurImage class] isSubclassOfClass:[ALVImgurImage class]]) {
+                    return imgurImage;
+                }
+            }
+            break;
+        }
+            
+        default:
+            break;
+    }
     
+    return nil;
+}
+
+- (NSIndexPath *)indexPathForImgurImage:(ALVImgurImage *)imgurImage {
+    if ([self.imgurImages containsObject:imgurImage]) {
+        NSUInteger section = 0;
+        NSUInteger row = [self.imgurImages indexOfObject:imgurImage];
+        
+        return [NSIndexPath indexPathForItem:row inSection:section];
+    }
+    
+    return nil;
+}
+
+#pragma mark - MWPhotoBrowserDelegate Methods
+- (NSUInteger)numberOfPhotosInPhotoBrowser:(MWPhotoBrowser *)photoBrowser {
+    return [self.browserPhotos count];
+}
+
+- (id <MWPhoto>)photoBrowser:(MWPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index {
+    if (index < [self.browserPhotos count]) {
+        return [self.browserPhotos objectAtIndex:index];
+    }
+    
+    return nil;
 }
 
 @end
