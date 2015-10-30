@@ -35,6 +35,29 @@ static NSString *const kSearchTextKey = @"search_text_key";
     self.searchBarInterceptor = nil;
 }
 
+- (UIToolbar *)dimissalToolbar {
+    if (!_dimissalToolbar) {
+        UIToolbar *toolbar = [[UIToolbar alloc] init];
+        
+        [toolbar setBackgroundColor:[UIColor clearColor]];
+        toolbar.translucent = YES;
+        toolbar.tintColor = nil;
+        [toolbar sizeToFit];
+        
+        UIBarButtonItem *doneBarButton = [[UIBarButtonItem alloc] initWithTitle:@"Done"
+                                                                          style:UIBarButtonItemStyleBordered target:self
+                                                                         action:@selector(resignFirstResponder)];
+
+        UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil];
+        
+        [toolbar setItems:[NSArray arrayWithObjects:flex, doneBarButton, nil]];
+        
+        _dimissalToolbar = toolbar;
+    }
+    
+    return _dimissalToolbar;
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {
@@ -86,6 +109,9 @@ static NSString *const kSearchTextKey = @"search_text_key";
     [self setTintColor:[UIColor blueColor]];
     [self setBarTintColor:[UIColor whiteColor]];
     [[self textField] setPlaceholder:@"Search Imgur"];
+    
+    // Add the dismissal toolbar
+    self.inputAccessoryView = self.dimissalToolbar;
 }
 
 - (void)configure {

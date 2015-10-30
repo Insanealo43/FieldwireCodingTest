@@ -11,6 +11,7 @@
 @protocol ALVSearchBarDelegate;
 @interface ALVSearchBar : UISearchBar
 
+@property (strong, nonatomic) UIToolbar *dimissalToolbar;
 @property (assign, nonatomic) NSTimeInterval triggerDuration;
 @property (assign, nonatomic, readonly) BOOL isSearching;
 
