@@ -124,8 +124,16 @@ static const CGFloat kImageInset = 1;
 -(void)setHighlighted:(BOOL)highlighted {
     [super setHighlighted:highlighted];
     
+    [self.overlayView removeFromSuperview];
     
-    [self setNeedsDisplay];
+    if (highlighted) {
+        [self.overlayView setAlpha:1.0];
+        [self.contentView addSubview:self.overlayView];
+        [self.contentView bringSubviewToFront:self.imageView];
+    }
+    
+    [self.imageView setAlpha:highlighted ? 0.5 : 1.0];
+    //[self setNeedsDisplay];
 }
 
 @end
