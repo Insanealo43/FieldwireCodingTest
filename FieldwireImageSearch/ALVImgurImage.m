@@ -31,7 +31,7 @@ static NSString *const kIdKey = @"id";
     _fetchedImage = nil;
     
     // Start fetching Image from url
-    if ([link length] > 0) {
+    /*if ([link length] > 0) {
         
         // Fetch the thumbnail of the image
         [ALVImageManager fetchImageWithLink:[self thumbnailLink] completion:^(UIImage *image) {
@@ -58,7 +58,7 @@ static NSString *const kIdKey = @"id";
                 NSLog(@"Posting Fetched Image Notification!");
             }
         }];
-    }
+    }*/
 }
 
 - (NSString *)thumbnailLink {

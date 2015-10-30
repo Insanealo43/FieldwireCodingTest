@@ -17,4 +17,6 @@ extern const CGFloat kImageCellDefaultHeight;
 @property (strong, nonatomic) UIImageView *imageView;
 @property (weak, nonatomic) ALVImgurImage *imageData;
 
+- (void)animteLoading:(BOOL)animate;
+
 @end

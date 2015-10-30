@@ -37,7 +37,7 @@
         UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
         [flowLayout setScrollDirection:UICollectionViewScrollDirectionVertical];
         [flowLayout setMinimumInteritemSpacing:0.0];
-        [flowLayout setMinimumLineSpacing:0.0];
+        [flowLayout setMinimumLineSpacing:10.0];
         
         ALVCollectionView *collectionView = [[ALVCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:flowLayout];
         [collectionView setBackgroundColor:[UIColor whiteColor]];
@@ -174,10 +174,22 @@
     
     switch (indexPath.section) {
         case 0: {
-            ALVImgurImageCell *imageCell = [collectionView dequeueReusableCellWithReuseIdentifier:[ALVImgurImageCell className] forIndexPath:indexPath];
+            __block ALVImgurImage *imageData = [self.imgurImages objectAtIndex:indexPath.row];
+            __block ALVImgurImageCell *imageCell = [collectionView dequeueReusableCellWithReuseIdentifier:[ALVImgurImageCell className] forIndexPath:indexPath];
             
-            ALVImgurImage *imageData = [self.imgurImages objectAtIndex:indexPath.row];
-            [imageCell setImageData:imageData];
+            // Check if we need to fetch the thumbnail image for the cell
+            if (!imageData.thumbnailImage) {
+                [imageCell animteLoading:YES];
+                [ALVImageManager fetchImageWithLink:imageData.thumbnailLink completion:^(UIImage *thumbnailImage) {
+                    
+                    // Update cell UI
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [imageData setThumbnailImage:thumbnailImage];
+                        [imageCell animteLoading:NO];
+                        imageCell.imageView.image = thumbnailImage;
+                    });
+                }];
+            }
                         
             cell = imageCell;
             break;
@@ -188,6 +200,23 @@
     }
     
     return cell;
+}
+
+- (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
+    
+    switch (indexPath.section) {
+        case 0: {
+            // Prepare cell initial state
+            ALVImgurImage *imageData = [self.imgurImages objectAtIndex:indexPath.row];
+            ALVImgurImageCell *imageCell = (id)cell;
+            
+            [imageCell.imageView setImage:imageData.thumbnailImage];
+            [imageCell animteLoading:!imageData.thumbnailImage];
+        }
+            
+        default:
+            break;
+    }
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {

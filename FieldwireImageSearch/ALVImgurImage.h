@@ -19,6 +19,7 @@ extern NSString *const kFetchedImageNotification;
 
 @property (nonatomic, copy) NSString *identifier;
 @property (nonatomic, copy) NSString *link;
+@property (readonly) NSString *thumbnailLink;
 
 - (instancetype)initWithInfo:(NSDictionary *)imageInfo;
 

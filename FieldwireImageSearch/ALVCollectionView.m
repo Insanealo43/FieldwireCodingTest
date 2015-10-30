@@ -31,12 +31,14 @@ static const CGFloat kSpinnerDefaultDimension = 80;
 }
 
 - (void)animateSpinner:(BOOL)animate {
+    //[self setBackgroundColor:[UIColor whiteColor]];
     [self.spinner removeFromSuperview];
     
     if (animate) {
         // Start animating
         [self.spinner startAnimating];
         [self addSubview:self.spinner];
+        //[self setBackgroundColor:[[UIColor blackColor] colorWithAlphaComponent:0.75]];
         
     } else if (!animate) {
         // Stop animating

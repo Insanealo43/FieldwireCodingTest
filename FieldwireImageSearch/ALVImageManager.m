@@ -11,6 +11,7 @@
 #import <SDWebImage/UIImageView+WebCache.h>
 #import "ALVNetworkInterface.h"
 #import "ALVImgurImage.h"
+#import <SDWebImage/SDWebImageOperation.h>
 
 static NSString *const kDataKey = @"data";
 
@@ -89,7 +90,7 @@ static NSString *const kDataKey = @"data";
     }
 }
 
-+ (void)fetchImageWithLink:(NSString *)link completion:(void (^)(UIImage *))block {
++ (void)fetchImageWithLink:(NSString *)link completion:(void (^)(UIImage *))block {    
     if ([link length] > 0) {
         SDWebImageDownloader *downloader = [SDWebImageDownloader sharedDownloader];
         [downloader downloadImageWithURL:[NSURL URLWithString:link]
