@@ -76,7 +76,7 @@ const CGFloat kImageCellDefaultHeight = 64;
     
     [self.spinner removeFromSuperview];
     if (!imageData.fetchedImage) {
-        [self.spinner addSubview:self.spinner];
+        [self.contentView addSubview:self.spinner];
         
     } else {
         [self.imageView setImage:imageData.fetchedImage];
