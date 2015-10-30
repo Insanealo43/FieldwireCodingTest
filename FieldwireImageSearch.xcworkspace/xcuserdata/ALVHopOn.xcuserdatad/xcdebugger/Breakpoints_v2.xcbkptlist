@@ -138,12 +138,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FieldwireImageSearch/ViewController.m"
-            timestampString = "467904214.073751"
+            timestampString = "467905251.204785"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "306"
-            endingLineNumber = "306"
-            landmarkName = "-loadImgurImagesForSearch:pageNumber:completed:"
+            startingLineNumber = "301"
+            endingLineNumber = "301"
+            landmarkName = "-loadImgurImagesForSearch:pageNumber:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -154,12 +154,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FieldwireImageSearch/ViewController.m"
-            timestampString = "467904214.073751"
+            timestampString = "467905251.204785"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "318"
-            endingLineNumber = "318"
-            landmarkName = "-loadImgurImagesForSearch:pageNumber:completed:"
+            startingLineNumber = "313"
+            endingLineNumber = "313"
+            landmarkName = "-loadImgurImagesForSearch:pageNumber:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -170,28 +170,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FieldwireImageSearch/ViewController.m"
-            timestampString = "467904280.295823"
+            timestampString = "467905251.204785"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "398"
-            endingLineNumber = "398"
+            startingLineNumber = "421"
+            endingLineNumber = "421"
             landmarkName = "-scrollViewDidScroll:"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "FieldwireImageSearch/ViewController.m"
-            timestampString = "467900363.705142"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "252"
-            endingLineNumber = "252"
-            landmarkName = "-searchBar:textDidChange:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -232,11 +216,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FieldwireImageSearch/ViewController.m"
-            timestampString = "467904280.295823"
+            timestampString = "467905251.204785"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "548"
-            endingLineNumber = "548"
+            startingLineNumber = "571"
+            endingLineNumber = "571"
             landmarkName = "-collectionView:didSelectItemAtIndexPath:"
             landmarkType = "5">
          </BreakpointContent>
@@ -248,44 +232,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FieldwireImageSearch/ViewController.m"
-            timestampString = "467900363.705142"
+            timestampString = "467905251.204785"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "283"
-            endingLineNumber = "283"
-            landmarkName = "-searchBar:timedTriggeredTextChange:"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "FieldwireImageSearch/ViewController.m"
-            timestampString = "467900363.705142"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "284"
-            endingLineNumber = "284"
-            landmarkName = "-searchBar:timedTriggeredTextChange:"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "FieldwireImageSearch/ViewController.m"
-            timestampString = "467904214.073751"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "326"
-            endingLineNumber = "326"
-            landmarkName = "-loadImgurImagesForSearch:pageNumber:completed:"
+            startingLineNumber = "321"
+            endingLineNumber = "321"
+            landmarkName = "-loadImgurImagesForSearch:pageNumber:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

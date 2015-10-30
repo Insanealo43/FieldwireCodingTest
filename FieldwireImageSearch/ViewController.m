@@ -242,21 +242,18 @@ static const CGFloat kRecentSearchLabelHeight = 64;
     [self.searchesCollection setHidden:textExists];
     [self.imageCollection setHidden:!textExists];
     
-    dispatch_async(dispatch_get_main_queue(), ^{
+    // Remove all cells
+    [self.imageCollection.collectionViewLayout invalidateLayout];
+    [self.imageCollection reloadData];
+    
+    // Start loading animation
+    if ([searchText length] > 0) {
+        [self.imageCollection animateSpinner:YES];
         
-        // Remove all cells
-        [self.imageCollection.collectionViewLayout invalidateLayout];
-        [self.imageCollection reloadData];
-
-        // Start loading animation
-        if ([searchText length] > 0) {
-            [self.imageCollection animateSpinner:YES];
-            
-        } else {
-            [self.searchesCollection.collectionViewLayout invalidateLayout];
-            [self.searchesCollection reloadData];
-        }
-    });
+    } else {
+        [self.searchesCollection.collectionViewLayout invalidateLayout];
+        [self.searchesCollection reloadData];
+    }
 }
 
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
@@ -279,24 +276,6 @@ static const CGFloat kRecentSearchLabelHeight = 64;
     self.imgurImages = [NSMutableArray new];
     self.browserPhotos = [NSMutableArray new];
     self.pageNum = @0;
-    
-    // Save recent search
-    if (searchText.length > 0) {
-        [self.recentSearches insertObject:searchText atIndex:0];
-        
-        // Keep recent searches at a cap
-        if ([self.recentSearches count] > kMaxNumberSavedPreviousSearches) {
-            self.recentSearches = [NSMutableArray arrayWithArray:[self.recentSearches subarrayWithRange:NSMakeRange(0, kMaxNumberSavedPreviousSearches)]];
-        }
-        
-        // Update the User Defaults
-        NSString *classRecentSearchesKey = [NSString stringWithFormat:@"%@.recentSearches", [self className]];
-        [[NSUserDefaults standardUserDefaults] setObject:self.recentSearches forKey:classRecentSearchesKey];
-        
-        // Reload recent searches
-        [self.searchesCollection.collectionViewLayout invalidateLayout];
-        [self.searchesCollection reloadData];
-    }
     
     // Start Infinite Loading of search results
     [self loadImgurImagesForSearch:searchText pageNumber:self.pageNum];
@@ -331,6 +310,11 @@ static const CGFloat kRecentSearchLabelHeight = 64;
                         [self showNoResultsAlert];
                         return;
                     }
+                }
+                
+                // Save the recent search
+                if ([foundImages count] > 0) {
+                    [self saveRecentSearch:searchText];
                 }
                 
                 // Update current page number
@@ -372,6 +356,29 @@ static const CGFloat kRecentSearchLabelHeight = 64;
                 [self scrollViewDidScroll:self.imageCollection];
             }
         }];
+    }
+}
+
+- (void)saveRecentSearch:(NSString *)searchText {
+    if (searchText.length > 0) {
+        if ([self.recentSearches containsObject:searchText]) {
+            // Need to bump position of search result to top of our list
+            [self.recentSearches removeObject:searchText];
+            [self.recentSearches insertObject:searchText atIndex:0];
+            
+        } else {
+            // Add and adjust our list
+            [self.recentSearches insertObject:searchText atIndex:0];
+            
+            // Keep recent searches at a cap
+            if ([self.recentSearches count] > kMaxNumberSavedPreviousSearches) {
+                self.recentSearches = [NSMutableArray arrayWithArray:[self.recentSearches subarrayWithRange:NSMakeRange(0, kMaxNumberSavedPreviousSearches)]];
+            }
+        }
+        
+        // Update the User Defaults
+        NSString *classRecentSearchesKey = [NSString stringWithFormat:@"%@.recentSearches", [self className]];
+        [[NSUserDefaults standardUserDefaults] setObject:self.recentSearches forKey:classRecentSearchesKey];
     }
 }
 
