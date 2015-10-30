@@ -14,6 +14,9 @@
 #import <SDWebImage/SDWebImageOperation.h>
 
 static NSString *const kDataKey = @"data";
+static NSString *const kTypeKey = @"type";
+
+static NSString *const kImageJpegType = @"image/jpeg";
 
 @implementation ALVImageManager
 
@@ -95,6 +98,7 @@ static NSString *const kDataKey = @"data";
 
 + (void)fetchImageWithLink:(NSString *)link completion:(void (^)(UIImage *))block {    
     if ([link length] > 0) {
+        NSLog(@"STARTING FETCH: About to fetch image with url - %@", link);
         SDWebImageDownloader *downloader = [SDWebImageDownloader sharedDownloader];
         [downloader downloadImageWithURL:[NSURL URLWithString:link]
                                  options:0
@@ -103,6 +107,9 @@ static NSString *const kDataKey = @"data";
                                     
                                 }
                                completed:^(UIImage *image, NSData *data, NSError *error, BOOL finished) {
+                                   if (!image || error) {
+                                       NSLog(@"ERROR: Could not fetch image for url: %@", link);
+                                   }
                                    if (block) block (image);
                                }];
         
@@ -130,8 +137,12 @@ static NSString *const kDataKey = @"data";
     
     NSArray *imagesInfo = [imagesData objectForKeyNotNull:kDataKey];
     for (NSDictionary *data in imagesInfo) {
-        ALVImgurImage *imgurImage = [[ALVImgurImage alloc] initWithInfo:data];
-        [images addObject:imgurImage];
+        // Parse images only
+        NSString *type = [data objectForKeyNotNull:kTypeKey];
+        if ([type isEqualToString:kImageJpegType]) {
+            ALVImgurImage *imgurImage = [[ALVImgurImage alloc] initWithInfo:data];
+            [images addObject:imgurImage];
+        }
     }
     
     return images;

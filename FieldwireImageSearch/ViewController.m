@@ -21,6 +21,8 @@
 #import "ALVImgurImageCell.h"
 #import "ALVImgurImage.h"
 
+static const CGFloat kCellSpacing = 10;
+
 @interface ViewController () <ALVSearchBarDelegate, IMGSessionDelegate, UICollectionViewDelegate, UICollectionViewDataSource>
 
 @property (strong, nonatomic) ALVSearchBar *customSearchBar;
@@ -37,11 +39,12 @@
         UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
         [flowLayout setScrollDirection:UICollectionViewScrollDirectionVertical];
         [flowLayout setMinimumInteritemSpacing:0.0];
-        [flowLayout setMinimumLineSpacing:10.0];
+        [flowLayout setMinimumLineSpacing:kCellSpacing];
         
         ALVCollectionView *collectionView = [[ALVCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:flowLayout];
         [collectionView setBackgroundColor:[UIColor whiteColor]];
         [collectionView setAlwaysBounceVertical:YES];
+        [collectionView setContentInset:UIEdgeInsetsMake(0, kCellSpacing, kCellSpacing, kCellSpacing)];
         [collectionView setDataSource:self];
         [collectionView setDelegate:self];
         
