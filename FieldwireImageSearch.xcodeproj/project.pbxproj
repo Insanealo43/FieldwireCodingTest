@@ -19,6 +19,7 @@
 		A39C28131BE2E41E00770010 /* ALVDelegateInterceptor.m in Sources */ = {isa = PBXBuildFile; fileRef = A39C28121BE2E41E00770010 /* ALVDelegateInterceptor.m */; settings = {ASSET_TAGS = (); }; };
 		A39C28191BE2E97700770010 /* ALVSearchBar.m in Sources */ = {isa = PBXBuildFile; fileRef = A39C28181BE2E97700770010 /* ALVSearchBar.m */; settings = {ASSET_TAGS = (); }; };
 		A39C281C1BE2F62600770010 /* ALVImgurImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = A39C281B1BE2F62600770010 /* ALVImgurImageCell.m */; settings = {ASSET_TAGS = (); }; };
+		A39C281F1BE34DA400770010 /* MWPhotoBrowser+ALVAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = A39C281E1BE34DA400770010 /* MWPhotoBrowser+ALVAdditions.m */; settings = {ASSET_TAGS = (); }; };
 		A3A78B441BE2C6F300306D97 /* Environments.plist in Resources */ = {isa = PBXBuildFile; fileRef = A3A78B431BE2C6F300306D97 /* Environments.plist */; settings = {ASSET_TAGS = (); }; };
 		A3A78B471BE2C77400306D97 /* ALVNetworkInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = A3A78B461BE2C77400306D97 /* ALVNetworkInterface.m */; settings = {ASSET_TAGS = (); }; };
 		A3B808191BE2B4B70071A0BA /* ALVView.m in Sources */ = {isa = PBXBuildFile; fileRef = A3B808181BE2B4B70071A0BA /* ALVView.m */; settings = {ASSET_TAGS = (); }; };
@@ -53,6 +54,8 @@
 		A39C28181BE2E97700770010 /* ALVSearchBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ALVSearchBar.m; sourceTree = "<group>"; };
 		A39C281A1BE2F62600770010 /* ALVImgurImageCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ALVImgurImageCell.h; sourceTree = "<group>"; };
 		A39C281B1BE2F62600770010 /* ALVImgurImageCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ALVImgurImageCell.m; sourceTree = "<group>"; };
+		A39C281D1BE34DA400770010 /* MWPhotoBrowser+ALVAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MWPhotoBrowser+ALVAdditions.h"; sourceTree = "<group>"; };
+		A39C281E1BE34DA400770010 /* MWPhotoBrowser+ALVAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MWPhotoBrowser+ALVAdditions.m"; sourceTree = "<group>"; };
 		A3A78B431BE2C6F300306D97 /* Environments.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Environments.plist; sourceTree = "<group>"; };
 		A3A78B451BE2C77400306D97 /* ALVNetworkInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ALVNetworkInterface.h; sourceTree = "<group>"; };
 		A3A78B461BE2C77400306D97 /* ALVNetworkInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ALVNetworkInterface.m; sourceTree = "<group>"; };
@@ -188,6 +191,8 @@
 				A3B8081E1BE2B4F70071A0BA /* UIView+ALVAdditions.m */,
 				A39C280B1BE2DD4E00770010 /* NSDictionary+ALVAdditions.h */,
 				A39C280C1BE2DD4E00770010 /* NSDictionary+ALVAdditions.m */,
+				A39C281D1BE34DA400770010 /* MWPhotoBrowser+ALVAdditions.h */,
+				A39C281E1BE34DA400770010 /* MWPhotoBrowser+ALVAdditions.m */,
 			);
 			name = Categories;
 			sourceTree = "<group>";
@@ -322,6 +327,7 @@
 				A3B8081F1BE2B4F70071A0BA /* UIView+ALVAdditions.m in Sources */,
 				A39C280D1BE2DD4E00770010 /* NSDictionary+ALVAdditions.m in Sources */,
 				A39C28131BE2E41E00770010 /* ALVDelegateInterceptor.m in Sources */,
+				A39C281F1BE34DA400770010 /* MWPhotoBrowser+ALVAdditions.m in Sources */,
 				A39C28191BE2E97700770010 /* ALVSearchBar.m in Sources */,
 				A3B808281BE2B6AF0071A0BA /* ALVGlobals.m in Sources */,
 				A35A6F011BE2B1E0000834F3 /* AppDelegate.m in Sources */,

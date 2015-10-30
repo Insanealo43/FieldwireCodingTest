@@ -123,7 +123,6 @@ static const CGFloat kImageInset = 1;
 
 -(void)setHighlighted:(BOOL)highlighted {
     [super setHighlighted:highlighted];
-    
     [self.overlayView removeFromSuperview];
     
     if (highlighted) {
@@ -133,7 +132,6 @@ static const CGFloat kImageInset = 1;
     }
     
     [self.imageView setAlpha:highlighted ? 0.5 : 1.0];
-    //[self setNeedsDisplay];
 }
 
 @end

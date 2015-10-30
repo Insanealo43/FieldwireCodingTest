@@ -13,6 +13,7 @@
 #import "ALVNetworkInterface.h"
 #import <AFNetworking/AFNetworking.h>
 #import "NSObject+ALVAdditions.h"
+#import "MWPhotoBrowser+ALVAdditions.h"
 
 #import <ImgurSession/ImgurSession.h>
 #import "ALVSearchBar.h"
@@ -88,16 +89,12 @@ static const CGFloat kCellSpacing = 10;
     [self.navigationController.navigationBar setHidden:YES];
 }
 
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    
-}
-
 - (void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
     [self.navigationController.navigationBar setHidden:NO];
 }
--(void)viewWillLayoutSubviews {
+
+- (void)viewWillLayoutSubviews {
     [super viewWillLayoutSubviews];
     
     CGFloat yOffset = [[ALVGlobals statusBarHeight] floatValue];
@@ -113,18 +110,12 @@ static const CGFloat kCellSpacing = 10;
         // Check if the image needs to be updated in this controller
         if ([self.imgurImages containsObject:notification.object]) {
             ALVImgurImage *imgurImage = notification.object;
+            NSIndexPath *imageIndexPath = [self indexPathForImgurImage:imgurImage];
             
-            NSUInteger imageIndex = [self.imgurImages indexOfObject:notification.object];
-            NSIndexPath *imageIndexPath = [NSIndexPath indexPathForRow:imageIndex inSection:0];
-            
-            // Validate index path of image cell
-            if ([self.imageCollection numberOfSections] > 0) {
-                if ([self.imageCollection numberOfItemsInSection:0] > imageIndexPath.row) {
-                    
-                    // Reconfigure the cell
-                    ALVImgurImageCell *imageCell = (id)[self.imageCollection cellForItemAtIndexPath:imageIndexPath];
-                    [imageCell setImageData:imgurImage];
-                }
+            // Reconfigure the cell
+            if (imageIndexPath) {
+                ALVImgurImageCell *imageCell = (id)[self.imageCollection cellForItemAtIndexPath:imageIndexPath];
+                [imageCell setImageData:imgurImage];
             }
         }
     }
@@ -148,6 +139,7 @@ static const CGFloat kCellSpacing = 10;
     
     [ALVImageManager imagesForSearch:searchText completion:^(NSArray *foundImages) {
         if ([self.customSearchBar.text isEqualToString:searchTerm]) {
+            
             dispatch_async(dispatch_get_main_queue(), ^{
                 // Load in the found results
                 self.imgurImages = [NSMutableArray arrayWithArray:foundImages];
@@ -159,6 +151,40 @@ static const CGFloat kCellSpacing = 10;
             });
         }
     }];
+}
+
+- (ALVImgurImage *)imgurImageForIndexPath:(NSIndexPath *)indexPath {
+    // Validate section
+    switch (indexPath.section) {
+        case 0: {
+            // Validate row
+            if (indexPath.row < [self.imgurImages count]) {
+                id imgurImage = [self.imgurImages objectAtIndex:indexPath.row];
+                
+                // Validate class
+                if ([[imgurImage class] isSubclassOfClass:[ALVImgurImage class]]) {
+                    return imgurImage;
+                }
+            }
+            break;
+        }
+            
+        default:
+            break;
+    }
+    
+    return nil;
+}
+
+- (NSIndexPath *)indexPathForImgurImage:(ALVImgurImage *)imgurImage {
+    if ([self.imgurImages containsObject:imgurImage]) {
+        NSUInteger section = 0;
+        NSUInteger row = [self.imgurImages indexOfObject:imgurImage];
+        
+        return [NSIndexPath indexPathForItem:row inSection:section];
+    }
+    
+    return nil;
 }
 
 #pragma mark - ALVCollectionViewDelegate Callbacks
@@ -178,56 +204,44 @@ static const CGFloat kCellSpacing = 10;
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:[UICollectionViewCell className] forIndexPath:indexPath];
     
-    switch (indexPath.section) {
-        case 0: {
-            __block ALVImgurImage *imageData = [self.imgurImages objectAtIndex:indexPath.row];
-            __block ALVImgurImageCell *imageCell = [collectionView dequeueReusableCellWithReuseIdentifier:[ALVImgurImageCell className] forIndexPath:indexPath];
-            
-            // Check if we need to fetch the thumbnail image for the cell
-            if (!imageData.thumbnailImage) {
-                [imageCell animteLoading:YES];
-                [ALVImageManager fetchImageWithLink:imageData.thumbnailLink completion:^(UIImage *thumbnailImage) {
+    __block ALVImgurImage *imageData = [self.imgurImages objectAtIndex:indexPath.row];
+    if (imageData) {
+        __block ALVImgurImageCell *imageCell = [collectionView dequeueReusableCellWithReuseIdentifier:[ALVImgurImageCell className] forIndexPath:indexPath];
+        
+        // Check if we need to fetch the thumbnail image for the cell
+        if (!imageData.thumbnailImage) {
+            [imageCell animteLoading:YES];
+            [ALVImageManager fetchImageWithLink:imageData.thumbnailLink completion:^(UIImage *thumbnailImage) {
+                
+                // Update cell UI
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    // Save the thumbnail on the imgurImage instance
+                    [imageData setThumbnailImage:thumbnailImage];
                     
-                    // Update cell UI
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        // Save the thumbnail on the imgurImage instance
-                        [imageData setThumbnailImage:thumbnailImage];
-                        
-                        // Update the cell state
-                        [imageCell animteLoading:NO];
-                        imageCell.imageView.image = thumbnailImage;
-                        
-                        // Animate image onto cell
-                        [imageCell fadeImageIn];
-                    });
-                }];
-            }
-                        
-            cell = imageCell;
-            break;
+                    // Update the cell state
+                    [imageCell animteLoading:NO];
+                    imageCell.imageView.image = thumbnailImage;
+                    
+                    // Animate image onto cell
+                    [imageCell fadeImageIn];
+                });
+            }];
         }
-            
-        default:
-            break;
+        
+        cell = imageCell;
     }
     
     return cell;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
-    
-    switch (indexPath.section) {
-        case 0: {
-            // Prepare cell initial state
-            ALVImgurImage *imageData = [self.imgurImages objectAtIndex:indexPath.row];
-            ALVImgurImageCell *imageCell = (id)cell;
-            
-            [imageCell.imageView setImage:imageData.thumbnailImage];
-            [imageCell animteLoading:!imageData.thumbnailImage];
-        }
-            
-        default:
-            break;
+    ALVImgurImage *imageData = [self.imgurImages objectAtIndex:indexPath.row];
+    if (imageData) {
+        // Prepare cell initial state
+        ALVImgurImageCell *imageCell = (id)cell;
+        
+        [imageCell.imageView setImage:imageData.thumbnailImage];
+        [imageCell animteLoading:!imageData.thumbnailImage];
     }
 }
 
