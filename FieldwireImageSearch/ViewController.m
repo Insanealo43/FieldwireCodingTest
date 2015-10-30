@@ -190,9 +190,15 @@ static const CGFloat kCellSpacing = 10;
                     
                     // Update cell UI
                     dispatch_async(dispatch_get_main_queue(), ^{
+                        // Save the thumbnail on the imgurImage instance
                         [imageData setThumbnailImage:thumbnailImage];
+                        
+                        // Update the cell state
                         [imageCell animteLoading:NO];
                         imageCell.imageView.image = thumbnailImage;
+                        
+                        // Animate image onto cell
+                        [imageCell fadeImageIn];
                     });
                 }];
             }

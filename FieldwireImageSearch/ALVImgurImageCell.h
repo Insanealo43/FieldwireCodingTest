@@ -18,5 +18,7 @@ extern const CGFloat kImageCellDefaultHeight;
 @property (weak, nonatomic) ALVImgurImage *imageData;
 
 - (void)animteLoading:(BOOL)animate;
+- (void)fadeImageIn;
+- (void)fadeImageOut;
 
 @end

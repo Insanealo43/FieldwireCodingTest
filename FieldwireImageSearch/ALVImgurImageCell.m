@@ -18,6 +18,7 @@ static const CGFloat kImageInset = 1;
 @interface ALVImgurImageCell ()
 
 @property (strong, nonatomic) UIActivityIndicatorView *spinner;
+@property (strong, nonatomic) UIView *overlayView;
 
 @end
 
@@ -41,6 +42,16 @@ static const CGFloat kImageInset = 1;
         _spinner = spinner;
     }
     return _spinner;
+}
+
+- (UIView *)overlayView {
+    if (!_overlayView) {
+        UIView *overlayView = [[UIView alloc] init];
+        [overlayView setBackgroundColor:[UIColor whiteColor]];
+        
+        _overlayView = overlayView;
+    }
+    return _overlayView;
 }
 
 - (instancetype)init {
@@ -74,25 +85,8 @@ static const CGFloat kImageInset = 1;
     self.imageView.bounds = CGRectInset(self.frame, kImageInset, kImageInset);
     
     [self.spinner setFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
+    [self.overlayView setFrame:self.imageView.frame];
 }
-
-/*- (void)prepareForReuse {
-    [super prepareForReuse];
-    
-    [self animteLoading:NO];
-    self.imageData = nil;
-}*/
-
-/*- (void)setImageData:(ALVImgurImage *)imageData {
-    _imageData = imageData;
-    self.imageView.image = imageData.thumbnailImage;
-    
-    [self.spinner removeFromSuperview];
-    if (!imageData.thumbnailImage) {
-        [self.spinner startAnimating];
-        [self.contentView addSubview:self.spinner];
-    }
-}*/
 
 - (void)animteLoading:(BOOL)animate {
     [self.spinner removeFromSuperview];
@@ -102,6 +96,36 @@ static const CGFloat kImageInset = 1;
         [self.spinner startAnimating];
         [self.contentView addSubview:self.spinner];
     }
+}
+
+- (void)fadeImageIn {
+    [self.overlayView setAlpha:1.0];
+    [self.contentView addSubview:self.overlayView];
+    [self.contentView bringSubviewToFront:self.overlayView];
+    
+    [UIView animateWithDuration:0.5 animations:^{
+        [self.overlayView setAlpha:0.0];
+        
+    } completion:^(BOOL finished) {
+        [self.overlayView removeFromSuperview];
+    }];
+}
+
+- (void)fadeImageOut {
+    [self.overlayView setAlpha:0.0];
+    [self.contentView addSubview:self.overlayView];
+    [self.contentView bringSubviewToFront:self.overlayView];
+    
+    [UIView animateWithDuration:1.0 animations:^{
+        [self.overlayView setAlpha:1.0];
+    }];
+}
+
+-(void)setHighlighted:(BOOL)highlighted {
+    [super setHighlighted:highlighted];
+    
+    
+    [self setNeedsDisplay];
 }
 
 @end
