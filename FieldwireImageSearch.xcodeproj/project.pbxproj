@@ -20,6 +20,7 @@
 		A39C28191BE2E97700770010 /* ALVSearchBar.m in Sources */ = {isa = PBXBuildFile; fileRef = A39C28181BE2E97700770010 /* ALVSearchBar.m */; settings = {ASSET_TAGS = (); }; };
 		A39C281C1BE2F62600770010 /* ALVImgurImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = A39C281B1BE2F62600770010 /* ALVImgurImageCell.m */; settings = {ASSET_TAGS = (); }; };
 		A39C281F1BE34DA400770010 /* MWPhotoBrowser+ALVAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = A39C281E1BE34DA400770010 /* MWPhotoBrowser+ALVAdditions.m */; settings = {ASSET_TAGS = (); }; };
+		A39C28221BE360C200770010 /* fieldwireLogo.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A39C28211BE360C200770010 /* fieldwireLogo.jpg */; settings = {ASSET_TAGS = (); }; };
 		A3A78B441BE2C6F300306D97 /* Environments.plist in Resources */ = {isa = PBXBuildFile; fileRef = A3A78B431BE2C6F300306D97 /* Environments.plist */; settings = {ASSET_TAGS = (); }; };
 		A3A78B471BE2C77400306D97 /* ALVNetworkInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = A3A78B461BE2C77400306D97 /* ALVNetworkInterface.m */; settings = {ASSET_TAGS = (); }; };
 		A3B808191BE2B4B70071A0BA /* ALVView.m in Sources */ = {isa = PBXBuildFile; fileRef = A3B808181BE2B4B70071A0BA /* ALVView.m */; settings = {ASSET_TAGS = (); }; };
@@ -56,6 +57,7 @@
 		A39C281B1BE2F62600770010 /* ALVImgurImageCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ALVImgurImageCell.m; sourceTree = "<group>"; };
 		A39C281D1BE34DA400770010 /* MWPhotoBrowser+ALVAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MWPhotoBrowser+ALVAdditions.h"; sourceTree = "<group>"; };
 		A39C281E1BE34DA400770010 /* MWPhotoBrowser+ALVAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MWPhotoBrowser+ALVAdditions.m"; sourceTree = "<group>"; };
+		A39C28211BE360C200770010 /* fieldwireLogo.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = fieldwireLogo.jpg; sourceTree = "<group>"; };
 		A3A78B431BE2C6F300306D97 /* Environments.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Environments.plist; sourceTree = "<group>"; };
 		A3A78B451BE2C77400306D97 /* ALVNetworkInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ALVNetworkInterface.h; sourceTree = "<group>"; };
 		A3A78B461BE2C77400306D97 /* ALVNetworkInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ALVNetworkInterface.m; sourceTree = "<group>"; };
@@ -124,6 +126,7 @@
 		A35A6EFB1BE2B1E0000834F3 /* FieldwireImageSearch */ = {
 			isa = PBXGroup;
 			children = (
+				A39C28201BE3605B00770010 /* Assets */,
 				A3B808161BE2B4890071A0BA /* Categories */,
 				A39C28071BE2DC0200770010 /* Models */,
 				A3B808151BE2B47A0071A0BA /* Views */,
@@ -165,6 +168,14 @@
 				A39C28091BE2DC2000770010 /* ALVImgurImage.m */,
 			);
 			name = Models;
+			sourceTree = "<group>";
+		};
+		A39C28201BE3605B00770010 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				A39C28211BE360C200770010 /* fieldwireLogo.jpg */,
+			);
+			name = Assets;
 			sourceTree = "<group>";
 		};
 		A3B808151BE2B47A0071A0BA /* Views */ = {
@@ -260,6 +271,7 @@
 			files = (
 				A3A78B441BE2C6F300306D97 /* Environments.plist in Resources */,
 				A35A6F0C1BE2B1E0000834F3 /* LaunchScreen.storyboard in Resources */,
+				A39C28221BE360C200770010 /* fieldwireLogo.jpg in Resources */,
 				A35A6F091BE2B1E0000834F3 /* Assets.xcassets in Resources */,
 				A35A6F071BE2B1E0000834F3 /* Main.storyboard in Resources */,
 			);
@@ -448,6 +460,7 @@
 			baseConfigurationReference = A73D4019B129B093928023F6 /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				INFOPLIST_FILE = FieldwireImageSearch/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -461,6 +474,7 @@
 			baseConfigurationReference = 8B593EFFBB37B7DCA511E18C /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				INFOPLIST_FILE = FieldwireImageSearch/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

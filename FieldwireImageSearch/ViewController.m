@@ -32,7 +32,9 @@ static const CGFloat kPagingLoadHeight = 40;
 
 @property (strong, nonatomic) NSMutableArray *imgurImages;
 @property (strong, nonatomic) NSMutableArray *browserPhotos;
-//@property (strong, nonatomic) NSNumber *currentPage;
+
+@property (strong, nonatomic) NSNumber *pageNum;
+@property (assign, nonatomic) BOOL isFetchingPage;
 
 @end
 
@@ -130,7 +132,8 @@ static const CGFloat kPagingLoadHeight = 40;
         // Clear previous dataset states
         self.imgurImages = nil;
         self.browserPhotos = nil;
-        //self.currentPage = nil;
+        self.pageNum = nil;
+        self.isFetchingPage = NO;
         
         // Remove all cells
         [self.imageCollection reloadData];
@@ -145,10 +148,10 @@ static const CGFloat kPagingLoadHeight = 40;
 - (void)searchBar:(ALVSearchBar *)searchBar timedTriggeredTextChange:(NSString *)searchText {
     self.imgurImages = [NSMutableArray new];
     self.browserPhotos = [NSMutableArray new];
-    //self.currentPage = @0;
+    self.pageNum = @0;
     
     // Start Infinite Loading of search results
-    [self loadImgurImagesForSearch:searchText pageNumber:@0];
+    [self loadImgurImagesForSearch:searchText pageNumber:self.pageNum];
     
     
     /*// Start the image loading for the search term
@@ -181,56 +184,92 @@ static const CGFloat kPagingLoadHeight = 40;
 
 - (void)loadImgurImagesForSearch:(NSString *)searchText pageNumber:(NSNumber *)pageNum {
     if ([searchText isEqualToString:self.customSearchBar.text]) {
+        // Set page fetching flag
+        self.isFetchingPage = YES;
         
         // Start the image loading for the search term
         [ALVImageManager imagesForSearch:searchText pageNumber:pageNum completion:^(NSArray *foundImages) {
             
+            // Reset fetching flag
+            self.isFetchingPage = NO;
+            
             // Ensure we are still dealing with the same state
             if ([self.customSearchBar.text isEqualToString:searchText]) {
                 
+                // End loading animation
+                [self.imageCollection animateSpinner:NO];
+                
+                // Check if we didnt find any results
+                if ([searchText length] > 0 && [pageNum isEqual:@0] && [foundImages count] == 0) {
+                    // Clear page number
+                    self.pageNum = nil;
+                    
+                    // Show alert
+                    NSString *title = @"No Results Found";
+                    NSString *message = [NSString stringWithFormat:@"Could not find any images matching:\n\'%@\'.\n\nPlease modify your search.", searchText];
+                    
+                    UIAlertView *noResultsAlert = [[UIAlertView alloc] initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+                    [noResultsAlert show];
+                    
+                    return;
+                }
+                
+                // Update current page number
+                self.pageNum = @([self.pageNum integerValue] + 1);
+                
+                // Load in the found results
+                [self.imgurImages addObjectsFromArray:foundImages];
+                
+                // Create corresponding photos for the browser
+                NSMutableArray *browserPhotos = [NSMutableArray new];
+                for (ALVImgurImage *imgurImage in foundImages) {
+                    NSURL *photoUrl = [NSURL URLWithString:imgurImage.link];
+                    [browserPhotos addObject:[MWPhoto photoWithURL:photoUrl]];
+                }
+                [self.browserPhotos addObjectsFromArray:browserPhotos];
+                
+                // Insert the new index paths for the fetched images
+                NSMutableArray *insertedIndexPaths = [NSMutableArray new];
+                for (ALVImgurImage *image in foundImages) {
+                    NSIndexPath *indexPath = [self indexPathForImgurImage:image];
+                    if (indexPath) {
+                        [insertedIndexPaths addObject:indexPath];
+                    }
+                }
+                
+                // Update the image collection UI
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    // End loading animation
-                    [self.imageCollection animateSpinner:NO];
-                    
-                    // Check if we didnt find any results
-                    if ([searchText length] > 0 && [pageNum isEqual:@0] && [foundImages count] == 0) {
-                        NSString *title = @"No Results Found";
-                        NSString *message = [NSString stringWithFormat:@"Could not find any images matching:\n\'%@\'.\n\nPlease modify your search.", searchText];
-                        
-                        UIAlertView *noResultsAlert = [[UIAlertView alloc] initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
-                        [noResultsAlert show];
-                        
-                        return;
-                    }
-                    
-                    // Load in the found results
-                    [self.imgurImages addObjectsFromArray:foundImages];
-                    
-                    // Create corresponding photos for the browser
-                    NSMutableArray *browserPhotos = [NSMutableArray new];
-                    for (ALVImgurImage *imgurImage in foundImages) {
-                        NSURL *photoUrl = [NSURL URLWithString:imgurImage.link];
-                        [browserPhotos addObject:[MWPhoto photoWithURL:photoUrl]];
-                    }
-                    [self.browserPhotos addObjectsFromArray:browserPhotos];
-                    
-                    // Insert the new index paths for the fetched images
-                    NSMutableArray *insertedIndexPaths = [NSMutableArray new];
-                    for (ALVImgurImage *image in foundImages) {
-                        NSIndexPath *indexPath = [self indexPathForImgurImage:image];
-                        if (indexPath) {
-                            [insertedIndexPaths addObject:indexPath];
-                        }
-                    }
                     [self.imageCollection insertItemsAtIndexPaths:insertedIndexPaths];
-                    
-                    // Check if we need to start fetching the next page
-                    if ([foundImages count] > 0) {
-                        [self loadImgurImagesForSearch:searchText pageNumber:@([pageNum integerValue] + 1)];
-                    }
                 });
+                
+                // Check if we are done fetching the image results
+                if ([foundImages count] == 0) {
+                    self.pageNum = nil;
+                }
+                
+                // Trigger scrolling logic manually
+                [self scrollViewDidScroll:self.imageCollection];
             }
         }];
+    }
+}
+
+#pragma mark - UIScrollViewDelegate Methods
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    // Check that we aren't already fetching a page
+    if (!self.isFetchingPage) {
+        
+        // Check if we need to start fetching the next page
+        if (self.pageNum) {
+            CGFloat offsetY = scrollView.contentOffset.y;
+            CGFloat contentHeight = scrollView.contentSize.height;
+            
+            // Check to see if we hit the bottom of our collection
+            if (offsetY > contentHeight - 2*scrollView.frame.size.height) {
+                // Start fetching the next batch of images
+                [self loadImgurImagesForSearch:self.customSearchBar.text pageNumber:@([self.pageNum integerValue] + 1)];
+            }
+        }
     }
 }
 
