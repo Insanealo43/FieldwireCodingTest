@@ -14,6 +14,8 @@ extern const CGFloat kImageCellDefaultHeight;
 @class ALVImgurImage;
 @interface ALVImgurImageCell : UICollectionViewCell
 
++ (CGSize)cellSize;
+
 @property (strong, nonatomic) UIImageView *imageView;
 @property (weak, nonatomic) ALVImgurImage *imageData;
 

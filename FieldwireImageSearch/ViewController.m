@@ -429,8 +429,7 @@ static const CGFloat kRecentSearchLabelHeight = 64;
         return CGSizeMake(self.recentSearchLabel.frame.size.width, kRecentSearchCellDefaultHeight);
     }
     
-    CGSize imageCellSize = CGSizeMake(kImageCellDefaultWidth, kImageCellDefaultHeight);
-    return imageCellSize;
+    return [ALVImgurImageCell cellSize];
 }
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath {

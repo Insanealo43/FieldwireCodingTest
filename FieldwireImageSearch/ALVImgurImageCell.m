@@ -14,6 +14,7 @@ const CGFloat kImageCellDefaultWidth = 64;
 const CGFloat kImageCellDefaultHeight = 64;
 
 static const CGFloat kImageInset = 1;
+static const CGFloat kIpadSizeMultipler = 2;
 
 @interface ALVImgurImageCell ()
 
@@ -23,6 +24,14 @@ static const CGFloat kImageInset = 1;
 @end
 
 @implementation ALVImgurImageCell
+
++ (CGSize)cellSize {
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        return CGSizeMake(kIpadSizeMultipler*kImageCellDefaultWidth, kIpadSizeMultipler*kImageCellDefaultHeight);
+    }
+    
+    return CGSizeMake(kImageCellDefaultWidth, kImageCellDefaultHeight);
+}
 
 - (UIImageView *)imageView {
     if (!_imageView) {
