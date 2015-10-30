@@ -28,13 +28,16 @@ static NSString *const kDataKey = @"data";
 }
 
 + (void)imagesForSearch:(NSString *)searchString completion:(void(^)(NSArray *imgurImages)) block {
-    
     __block NSMutableArray *fetchedImages = [NSMutableArray new];
     if ([searchString length] > 0) {
+        
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             // https://api.imgur.com/3/gallery/search/2?q=%@
-            NSString *imageSearchEndpoint = [NSString stringWithFormat:@"https://api.imgur.com/3/gallery/search/2?q=%@", searchString];
-            NSMutableURLRequest *request = [[self sharedInstance] getUrlRequestWithString:imageSearchEndpoint];
+            NSString *imageSearchEndpoint = [NSString stringWithFormat:@"https://api.imgur.com/3/gallery/search/1?q=%@", searchString];
+            NSString *urlEncodedString = [imageSearchEndpoint stringByAddingPercentEscapesUsingEncoding:
+                                    NSUTF8StringEncoding];
+            
+            NSMutableURLRequest *request = [[self sharedInstance] getUrlRequestWithString:urlEncodedString];
             
             NSLog(@"About to fire request...");
             [NSURLConnection sendAsynchronousRequest:request

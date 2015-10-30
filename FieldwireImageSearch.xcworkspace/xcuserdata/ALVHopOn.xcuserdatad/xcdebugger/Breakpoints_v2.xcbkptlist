@@ -74,11 +74,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FieldwireImageSearch/ALVImageManager.m"
-            timestampString = "467876321.973047"
+            timestampString = "467878162.717145"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "78"
-            endingLineNumber = "78"
+            startingLineNumber = "81"
+            endingLineNumber = "81"
             landmarkName = "+fetchImageWithId:completion:"
             landmarkType = "5">
          </BreakpointContent>
@@ -112,6 +112,22 @@
             startingLineNumber = "111"
             endingLineNumber = "111"
             landmarkName = "-thumbnailImageFetchedNotification:"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "FieldwireImageSearch/ALVImageManager.m"
+            timestampString = "467878194.180507"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "40"
+            endingLineNumber = "40"
+            landmarkName = "+imagesForSearch:completion:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

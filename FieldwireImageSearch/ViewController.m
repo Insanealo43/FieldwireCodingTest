@@ -130,6 +130,10 @@
 #pragma mark - ALVSearchBarDelegate Methods
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
     dispatch_async(dispatch_get_main_queue(), ^{
+        // Clear previous dataset
+        self.imgurImages = nil;
+        [self.imageCollection reloadData];
+        
         // Start loading animation
         [self.imageCollection animateSpinner:YES];
     });
@@ -143,7 +147,6 @@
         if ([self.customSearchBar.text isEqualToString:searchTerm]) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 // Load in the found results
-                NSLog(@"Parsed Images - %@", foundImages);
                 self.imgurImages = [NSMutableArray arrayWithArray:foundImages];
                 [self.imageCollection reloadData];
                 
