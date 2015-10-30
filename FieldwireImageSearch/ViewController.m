@@ -87,7 +87,7 @@ static const CGFloat kCellSpacing = 10;
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    [self.navigationController.navigationBar setHidden:YES];
+    [self.navigationController.navigationBar setHidden:YES]; 
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
